@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.0.1](https://github.com/maowenbrad/bunbu-shelf/compare/v1.0.0...v1.0.1) (2026-05-08)
+
+
+### Bug Fixes
+
+* cover art rendering and edit button 404 ([da7182c](https://github.com/maowenbrad/bunbu-shelf/commit/da7182c0cffa7f00067a74a137910918dd3b08f1))
+* fetch cover synchronously on add so first render shows it ([1912a32](https://github.com/maowenbrad/bunbu-shelf/commit/1912a328e96f3c7c74acfc67d8f023d365b39de5))
+* preserve cover when editing book metadata ([faa66bc](https://github.com/maowenbrad/bunbu-shelf/commit/faa66bc77abfd1be38dbad54688d7fa7aba5276e))
+
 ## 1.0.0 (2026-05-08)
 
 
