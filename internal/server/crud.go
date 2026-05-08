@@ -75,6 +75,9 @@ func (s *Server) handleUpdateBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	meta := parseFrontmatterForm(r)
+	// The edit form does not expose Cover; preserve the existing value so
+	// saving via the form (e.g. changing status) doesn't wipe it.
+	meta.Cover = b.Meta.Cover
 	errs := book.ValidateMeta(meta)
 	if len(errs) > 0 {
 		http.Error(w, "validation error: "+errs[0].Error(), http.StatusUnprocessableEntity)
