@@ -3,6 +3,7 @@ package server
 import (
 	"io/fs"
 	"net/http"
+	"path/filepath"
 
 	"github.com/user/bunbu-shelf/internal/config"
 	"github.com/user/bunbu-shelf/internal/index"
@@ -43,6 +44,11 @@ func New(store *index.Store, cfg *config.Config, fsys fs.FS, devDir string) (*Se
 }
 
 func (s *Server) registerRoutes(fsys fs.FS) {
+	// Covers are stored on disk in the library directory, not embedded in the binary.
+	// Register this before the generic /static/ handler — more-specific pattern wins.
+	coversDir := filepath.Join(s.cfg.LibraryDir, "covers")
+	s.mux.Handle("GET /static/covers/", http.StripPrefix("/static/covers/", http.FileServer(http.Dir(coversDir))))
+
 	// Static assets — serve from static/ sub-tree within the embedded FS.
 	staticFS, _ := fs.Sub(fsys, "static")
 	s.mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServerFS(staticFS)))
