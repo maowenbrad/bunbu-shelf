@@ -89,31 +89,23 @@ func (s *Server) handleAddFromOpenLibrary(w http.ResponseWriter, r *http.Request
 		ISBN:   isbn,
 	}
 
+	// Fetch cover synchronously so the redirected detail page renders it
+	// on first paint. FetchCover has a bounded HTTP timeout.
+	var coverID int
+	fmt.Sscanf(coverIDStr, "%d", &coverID)
+	if coverID > 0 {
+		coverDir := filepath.Join(s.cfg.LibraryDir, "covers")
+		_ = os.MkdirAll(coverDir, 0o755)
+		client := openlibrary.New(coverDir)
+		if coverPath, err := client.FetchCover(r.Context(), coverID, slug); err == nil && coverPath != "" {
+			meta.Cover = coverPath
+		}
+	}
+
 	b := &book.Book{
 		Slug:     slug,
 		FilePath: path,
 		Meta:     meta,
-	}
-
-	// Fetch cover asynchronously.
-	var coverID int
-	fmt.Sscanf(coverIDStr, "%d", &coverID)
-	if coverID > 0 {
-		go func() {
-			coverDir := filepath.Join(s.cfg.LibraryDir, "covers")
-			_ = os.MkdirAll(coverDir, 0o755)
-			client := openlibrary.New(coverDir)
-			coverPath, err := client.FetchCover(context.Background(), coverID, slug)
-			if err == nil && coverPath != "" {
-				b2, err := book.ParseFile(path)
-				if err == nil {
-					b2.Meta.Cover = coverPath
-					_ = book.UpdateMeta(path, b2.Meta)
-					_ = s.store.IndexBook(b2)
-					s.hub.Broadcast("book-updated", slug)
-				}
-			}
-		}()
 	}
 
 	if err := book.WriteFile(b); err != nil {
