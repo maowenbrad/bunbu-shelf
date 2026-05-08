@@ -1,9 +1,39 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@source "../../web/templates";
+
+@theme {
+  /* Fonts */
+  --font-serif: "Lora", "Georgia", serif;
+  --font-sans: "Inter", system-ui, sans-serif;
+
+  /* Netflix color palette */
+  --color-netflix-black:     #141414;
+  --color-netflix-red:       #E50914;
+  --color-netflix-red-dark:  #B20710;
+  --color-netflix-red-hover: #F40612;
+  --color-netflix-surface:   #1f1f1f;
+  --color-netflix-surface-2: #2a2a2a;
+  --color-netflix-muted:     #808080;
+  --color-netflix-border:    #333333;
+}
 
 @layer base {
   :root {
     color-scheme: dark;
+  }
+
+  body {
+    background-color: #141414;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
   }
 }

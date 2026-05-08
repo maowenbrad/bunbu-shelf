@@ -7,26 +7,43 @@
   <link rel="stylesheet" href="/static/app.css">
   <script src="/static/htmx.min.js"></script>
 </head>
-<body class="bg-neutral-950 text-neutral-100 min-h-screen font-sans antialiased">
+<body class="bg-netflix-black text-white min-h-screen font-sans antialiased">
 
-  <!-- Nav -->
-  <nav class="border-b border-neutral-800 px-6 py-3">
-    <div class="max-w-7xl mx-auto flex items-center gap-6">
-      <a href="/" class="font-serif text-lg font-semibold text-neutral-100 tracking-tight">bunbu-shelf</a>
-      <div class="flex items-center gap-4 text-sm text-neutral-400">
-        <a href="/shelf" class="hover:text-neutral-100 transition-colors">Shelf</a>
-        <a href="/search" class="hover:text-neutral-100 transition-colors">Search</a>
-        <a href="/themes" class="hover:text-neutral-100 transition-colors">Themes</a>
-        <a href="/log" class="hover:text-neutral-100 transition-colors">Log</a>
-      </div>
-      <div class="ml-auto">
-        <a href="/settings" class="text-sm text-neutral-500 hover:text-neutral-300 transition-colors">Settings</a>
+  <!-- Nav: fixed, fades from transparent gradient to solid on scroll -->
+  <nav id="main-nav"
+       class="fixed top-0 left-0 right-0 z-50 transition-colors duration-300 px-6 py-4"
+       style="background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%);">
+    <div class="flex items-center justify-between max-w-screen-2xl mx-auto">
+      <!-- Logo -->
+      <a href="/" class="font-sans text-2xl font-black tracking-tighter text-netflix-red uppercase select-none">
+        bunbu-shelf
+      </a>
+
+      <!-- Nav links -->
+      <div class="flex items-center gap-6 text-sm font-medium text-white/70">
+        <a href="/shelf"    class="hover:text-white transition-colors">Shelf</a>
+        <a href="/search"   class="hover:text-white transition-colors">Search</a>
+        <a href="/themes"   class="hover:text-white transition-colors">Themes</a>
+        <a href="/log"      class="hover:text-white transition-colors">Log</a>
+        <a href="/settings" class="hover:text-white/40 transition-colors text-white/30">Settings</a>
       </div>
     </div>
   </nav>
 
+  <!-- Scroll handler: solid bg after scrolling past 80px -->
+  <script>
+    (function() {
+      var nav = document.getElementById('main-nav');
+      var solid = 'background:#141414';
+      var grad  = 'background:linear-gradient(to bottom,rgba(0,0,0,.75) 0%,transparent 100%)';
+      window.addEventListener('scroll', function() {
+        nav.style.cssText = window.scrollY > 80 ? solid : grad;
+      }, { passive: true });
+    })();
+  </script>
+
   <!-- Main content -->
-  <main class="max-w-7xl mx-auto px-6 py-8">
+  <main>
     {{block "content" .}}{{end}}
   </main>
 
