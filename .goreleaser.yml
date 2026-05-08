@@ -1,0 +1,75 @@
+# GoReleaser v2 — bunbu-shelf release configuration
+version: 2
+
+project_name: bunbu-shelf
+
+before:
+  hooks:
+    - go mod tidy
+    # Download Tailwind CLI (linux-x64) and compile CSS before building
+    - mkdir -p .bin
+    - sh -c 'test -f .bin/tailwindcss || curl -sLo .bin/tailwindcss https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64'
+    - chmod +x .bin/tailwindcss
+    - .bin/tailwindcss -i web/static/input.css -o web/static/app.css --minify
+
+builds:
+  - id: shelfd
+    binary: shelfd
+    main: ./cmd/shelfd
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+
+  - id: shelf
+    binary: shelf
+    main: ./cmd/shelf
+    env:
+      - CGO_ENABLED=0
+    goos: [linux, darwin, windows]
+    goarch: [amd64, arm64]
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+
+archives:
+  - id: default
+    builds: [shelfd, shelf]
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    format_overrides:
+      - goos: windows
+        formats: [zip]
+    files:
+      - README*
+      - LICENSE*
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  use: github
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - "Merge pull request"
+      - "Merge branch"
+
+release:
+  github:
+    owner: maowenbrad
+    name: bunbu-shelf
+  draft: false
+  prerelease: auto
+  name_template: "v{{.Version}}"
