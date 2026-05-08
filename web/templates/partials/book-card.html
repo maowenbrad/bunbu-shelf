@@ -4,7 +4,7 @@
               transition-transform duration-300 ease-out
               group-hover:scale-105 group-hover:z-10 group-hover:shadow-2xl group-hover:shadow-black/80">
     {{if .Cover}}
-    <img src="/static/covers/{{.Slug}}.jpg" alt="{{.Title}}" class="w-full h-full object-cover">
+    <img src="/static/{{.Cover}}" alt="{{.Title}}" class="w-full h-full object-cover">
     {{else}}
     <!-- Placeholder spine -->
     <div class="w-full h-full flex flex-col items-center justify-center p-3

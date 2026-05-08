@@ -11,7 +11,7 @@
   <!-- Blurred background -->
   <div class="absolute inset-0 z-0">
     {{if .Cover}}
-    <img src="/static/covers/{{.Slug}}.jpg" alt=""
+    <img src="/static/{{.Cover}}" alt=""
          class="w-full h-full object-cover scale-110 blur-sm opacity-25">
     {{else}}
     <div class="w-full h-full bg-gradient-to-br from-netflix-red/15 to-netflix-black"></div>
@@ -25,7 +25,7 @@
   <div class="relative z-10 max-w-7xl mx-auto px-6 w-full flex items-end gap-8">
     {{if .Cover}}
     <div class="hidden sm:block flex-shrink-0 w-32 md:w-44 shadow-2xl shadow-black rounded overflow-hidden">
-      <img src="/static/covers/{{.Slug}}.jpg" alt="{{.Title}}"
+      <img src="/static/{{.Cover}}" alt="{{.Title}}"
            class="w-full aspect-[2/3] object-cover">
     </div>
     {{end}}
