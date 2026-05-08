@@ -1,0 +1,39 @@
+{{template "base.html" .}}
+
+{{define "title"}}Shelf{{end}}
+
+{{define "content"}}
+<div class="space-y-6">
+
+  <!-- Header + filters -->
+  <div class="flex items-center justify-between flex-wrap gap-3">
+    <h1 class="font-serif text-2xl text-neutral-100">
+      {{if .Status}}{{statusLabel .Status}}{{else}}All Books{{end}}
+    </h1>
+
+    <div class="flex items-center gap-2 text-sm">
+      <!-- Status filter pills -->
+      <a href="/shelf" class="px-3 py-1 rounded-full {{if eq .Status ""}}bg-neutral-700 text-white{{else}}text-neutral-400 hover:text-white{{end}} transition-colors">All</a>
+      <a href="/shelf/reading" class="px-3 py-1 rounded-full {{if eq .Status "reading"}}bg-emerald-800 text-emerald-200{{else}}text-neutral-400 hover:text-white{{end}} transition-colors">Reading</a>
+      <a href="/shelf/queued" class="px-3 py-1 rounded-full {{if eq .Status "queued"}}bg-blue-900 text-blue-200{{else}}text-neutral-400 hover:text-white{{end}} transition-colors">Queued</a>
+      <a href="/shelf/finished" class="px-3 py-1 rounded-full {{if eq .Status "finished"}}bg-purple-900 text-purple-200{{else}}text-neutral-400 hover:text-white{{end}} transition-colors">Finished</a>
+      <a href="/shelf/antilibrary" class="px-3 py-1 rounded-full {{if eq .Status "antilibrary"}}bg-neutral-600 text-neutral-200{{else}}text-neutral-400 hover:text-white{{end}} transition-colors">Antilibrary</a>
+    </div>
+  </div>
+
+  <!-- Book grid -->
+  {{if .Books}}
+  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8 gap-4">
+    {{range .Books}}
+      {{template "book-card.html" .}}
+    {{end}}
+  </div>
+  {{else}}
+  <div class="text-center py-20">
+    <p class="text-neutral-500">No books here yet.</p>
+    <a href="/search" class="text-blue-400 text-sm hover:underline mt-2 inline-block">Add some →</a>
+  </div>
+  {{end}}
+
+</div>
+{{end}}

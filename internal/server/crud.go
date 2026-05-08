@@ -1,0 +1,233 @@
+package server
+
+import (
+	"fmt"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
+
+	"github.com/user/bunbu-shelf/internal/book"
+)
+
+func (s *Server) handleCreateBook(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	meta := parseFrontmatterForm(r)
+	errs := book.ValidateMeta(meta)
+	if len(errs) > 0 {
+		http.Error(w, "validation error: "+errs[0].Error(), http.StatusUnprocessableEntity)
+		return
+	}
+
+	slug := book.SlugFromTitle(meta.Title)
+	booksDir := filepath.Join(s.cfg.LibraryDir, "books")
+	if err := os.MkdirAll(booksDir, 0o755); err != nil {
+		http.Error(w, "cannot create books dir", http.StatusInternalServerError)
+		return
+	}
+
+	path := filepath.Join(booksDir, slug+".md")
+	// If slug conflicts, append a counter.
+	if _, err := os.Stat(path); err == nil {
+		for i := 2; ; i++ {
+			candidate := filepath.Join(booksDir, fmt.Sprintf("%s-%d.md", slug, i))
+			if _, err := os.Stat(candidate); os.IsNotExist(err) {
+				path = candidate
+				slug = fmt.Sprintf("%s-%d", slug, i)
+				break
+			}
+		}
+	}
+
+	b := &book.Book{
+		Slug:     slug,
+		FilePath: path,
+		Meta:     meta,
+	}
+	if err := book.WriteFile(b); err != nil {
+		http.Error(w, "write error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := s.store.IndexBook(b); err != nil {
+		http.Error(w, "index error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/book/"+slug, http.StatusSeeOther)
+}
+
+func (s *Server) handleUpdateBook(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	b, err := s.store.Get(slug)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	meta := parseFrontmatterForm(r)
+	errs := book.ValidateMeta(meta)
+	if len(errs) > 0 {
+		http.Error(w, "validation error: "+errs[0].Error(), http.StatusUnprocessableEntity)
+		return
+	}
+
+	if err := book.UpdateMeta(b.FilePath, meta); err != nil {
+		http.Error(w, "write error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	b.Meta = meta
+	if err := s.store.IndexBook(b); err != nil {
+		http.Error(w, "index error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/book/"+slug, http.StatusSeeOther)
+}
+
+func (s *Server) handleDeleteBook(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	b, err := s.store.Get(slug)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	// Delete the markdown file.
+	if err := os.Remove(b.FilePath); err != nil && !os.IsNotExist(err) {
+		http.Error(w, "delete error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Delete the cover if it's in the library covers dir.
+	if b.Meta.Cover != "" {
+		coverPath := filepath.Join(s.cfg.LibraryDir, b.Meta.Cover)
+		_ = os.Remove(coverPath)
+	}
+
+	if err := s.store.DeleteBook(slug); err != nil {
+		http.Error(w, "index error", http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/shelf", http.StatusSeeOther)
+}
+
+func (s *Server) handleUpdateStatus(w http.ResponseWriter, r *http.Request) {
+	slug := r.PathValue("slug")
+	b, err := s.store.Get(slug)
+	if err != nil {
+		http.NotFound(w, r)
+		return
+	}
+
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	newStatus := book.Status(r.FormValue("status"))
+	if !book.IsValidStatus(newStatus) {
+		http.Error(w, "invalid status", http.StatusBadRequest)
+		return
+	}
+
+	b.Meta.Status = newStatus
+	if err := book.UpdateMeta(b.FilePath, b.Meta); err != nil {
+		http.Error(w, "write error", http.StatusInternalServerError)
+		return
+	}
+	if err := s.store.IndexBook(b); err != nil {
+		http.Error(w, "index error", http.StatusInternalServerError)
+		return
+	}
+
+	s.hub.Broadcast("book-updated", slug)
+
+	// htmx request: return a minimal status badge fragment.
+	if r.Header.Get("HX-Request") == "true" {
+		w.Header().Set("Content-Type", "text/html")
+		fmt.Fprintf(w, `<span class="status-badge status-%s">%s</span>`, newStatus, newStatus)
+		return
+	}
+	http.Redirect(w, r, "/book/"+slug, http.StatusSeeOther)
+}
+
+func (s *Server) handleSaveSettings(w http.ResponseWriter, r *http.Request) {
+	if err := r.ParseForm(); err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+	// Apply changes to in-memory config (LibraryDir change requires restart).
+	s.cfg.ServerAddr = r.FormValue("server_addr")
+	tracks := r.FormValue("active_tracks")
+	s.cfg.ActiveTracks = splitTrimmed(tracks, ",")
+
+	http.Redirect(w, r, "/settings?saved=1", http.StatusSeeOther)
+}
+
+// parseFrontmatterForm extracts a Frontmatter from a form POST.
+func parseFrontmatterForm(r *http.Request) book.Frontmatter {
+	meta := book.Frontmatter{
+		Title:  strings.TrimSpace(r.FormValue("title")),
+		Author: strings.TrimSpace(r.FormValue("author")),
+		Status: book.Status(r.FormValue("status")),
+		Track:  strings.TrimSpace(r.FormValue("track")),
+		ISBN:   strings.TrimSpace(r.FormValue("isbn")),
+		Cover:  strings.TrimSpace(r.FormValue("cover")),
+		Source: strings.TrimSpace(r.FormValue("source")),
+	}
+
+	if themesRaw := r.FormValue("themes"); themesRaw != "" {
+		meta.Themes = splitTrimmed(themesRaw, ",")
+	}
+
+	if s := r.FormValue("started"); s != "" {
+		d := &book.Date{}
+		if _, err := fmt.Sscanf(s, "%d-%d-%d", &d.Year, &d.Month, &d.Day); err == nil {
+			meta.Started = d
+		}
+	}
+	if s := r.FormValue("finished"); s != "" {
+		d := &book.Date{}
+		if _, err := fmt.Sscanf(s, "%d-%d-%d", &d.Year, &d.Month, &d.Day); err == nil {
+			meta.Finished = d
+		}
+	}
+	if s := r.FormValue("acquired"); s != "" {
+		d := &book.Date{}
+		if _, err := fmt.Sscanf(s, "%d-%d-%d", &d.Year, &d.Month, &d.Day); err == nil {
+			meta.Acquired = d
+		}
+	}
+
+	if rStr := r.FormValue("rating"); rStr != "" {
+		if rv, err := strconv.Atoi(rStr); err == nil {
+			meta.Rating = &rv
+		}
+	}
+
+	return meta
+}
+
+func splitTrimmed(s, sep string) []string {
+	parts := strings.Split(s, sep)
+	var out []string
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}

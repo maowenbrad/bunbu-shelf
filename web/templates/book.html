@@ -1,0 +1,170 @@
+{{template "base.html" .}}
+
+{{define "title"}}{{.Book.Meta.Title}}{{end}}
+
+{{define "content"}}
+<div class="max-w-4xl mx-auto">
+
+  <!-- Book header -->
+  <div class="flex gap-8 mb-10">
+    <!-- Cover -->
+    <div class="flex-shrink-0 w-36 sm:w-48">
+      <div class="aspect-[2/3] bg-neutral-800 rounded-lg overflow-hidden shadow-xl">
+        {{if .Book.Meta.Cover}}
+        <img src="/{{.Book.Meta.Cover}}" alt="{{.Book.Meta.Title}}" class="w-full h-full object-cover">
+        {{else}}
+        <div class="w-full h-full flex flex-col items-center justify-center p-4 bg-neutral-800">
+          <span class="font-serif text-center text-sm text-neutral-300 leading-tight">{{.Book.Meta.Title}}</span>
+          <span class="text-neutral-500 text-xs mt-2 text-center">{{.Book.Meta.Author}}</span>
+        </div>
+        {{end}}
+      </div>
+    </div>
+
+    <!-- Metadata -->
+    <div class="flex-1 space-y-3">
+      <h1 class="font-serif text-3xl font-semibold text-neutral-100 leading-tight">{{.Book.Meta.Title}}</h1>
+      <p class="text-lg text-neutral-400">{{.Book.Meta.Author}}</p>
+
+      <!-- Status + quick change -->
+      <div class="flex items-center gap-2 flex-wrap">
+        <span id="status-badge" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{statusColor (print .Book.Meta.Status)}} bg-neutral-800">
+          {{statusLabel (print .Book.Meta.Status)}}
+        </span>
+        {{if .Book.Meta.Track}}
+        <span class="text-sm text-neutral-500">{{.Book.Meta.Track}}</span>
+        {{end}}
+      </div>
+
+      <!-- Rating -->
+      {{if .Book.Meta.Rating}}
+      <div class="flex gap-1 text-amber-400 text-lg">
+        {{range stars .Book.Meta.Rating}}{{.}}{{end}}
+      </div>
+      {{end}}
+
+      <!-- Themes -->
+      {{if .Book.Meta.Themes}}
+      <div class="flex flex-wrap gap-1.5">
+        {{range .Book.Meta.Themes}}
+        <a href="/themes" class="px-2 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 text-xs rounded transition-colors">{{.}}</a>
+        {{end}}
+      </div>
+      {{end}}
+
+      <!-- Dates -->
+      <dl class="grid grid-cols-2 gap-x-4 gap-y-1 text-sm">
+        {{if .Book.Meta.ISBN}}
+        <dt class="text-neutral-500">ISBN</dt><dd class="text-neutral-300">{{.Book.Meta.ISBN}}</dd>
+        {{end}}
+        {{if .Book.Meta.Started}}
+        <dt class="text-neutral-500">Started</dt><dd class="text-neutral-300">{{.Book.Meta.Started}}</dd>
+        {{end}}
+        {{if .Book.Meta.Finished}}
+        <dt class="text-neutral-500">Finished</dt><dd class="text-neutral-300">{{.Book.Meta.Finished}}</dd>
+        {{end}}
+        {{if .Book.Meta.Acquired}}
+        <dt class="text-neutral-500">Acquired</dt><dd class="text-neutral-300">{{.Book.Meta.Acquired}}</dd>
+        {{end}}
+        {{if .Book.Meta.Source}}
+        <dt class="text-neutral-500">Source</dt><dd class="text-neutral-300">{{.Book.Meta.Source}}</dd>
+        {{end}}
+      </dl>
+
+      <!-- Actions -->
+      <div class="flex gap-2 flex-wrap pt-2">
+        <a href="/book/{{.Book.Slug}}/edit" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-sm rounded transition-colors">Edit</a>
+        {{if .BuyLinks}}
+          {{range .BuyLinks}}
+          <a href="{{.URL}}" target="_blank" rel="noopener" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-sm rounded transition-colors capitalize">{{.Name}}</a>
+          {{end}}
+        {{end}}
+        <button
+          onclick="if(confirm('Delete this book?')) { fetch('/book/{{.Book.Slug}}', {method:'DELETE'}).then(r => { if(r.redirected) window.location=r.url; }); }"
+          class="px-4 py-2 bg-red-900/50 hover:bg-red-900 text-red-300 text-sm rounded transition-colors ml-auto"
+        >Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit form (collapsed by default, toggled by Edit button) -->
+  <details class="mb-8 border border-neutral-800 rounded-lg">
+    <summary class="px-5 py-3 text-sm text-neutral-400 cursor-pointer hover:text-neutral-200 transition-colors">Edit Metadata</summary>
+    <div class="px-5 pb-5 pt-3">
+      <form method="POST" action="/book/{{.Book.Slug}}" class="grid grid-cols-2 gap-4 text-sm">
+        <div class="col-span-2 sm:col-span-1">
+          <label class="block text-neutral-500 mb-1">Title</label>
+          <input type="text" name="title" value="{{.Book.Meta.Title}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div class="col-span-2 sm:col-span-1">
+          <label class="block text-neutral-500 mb-1">Author</label>
+          <input type="text" name="author" value="{{.Book.Meta.Author}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Status</label>
+          <select name="status" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none">
+            {{range .ValidStatuses}}
+            <option value="{{.}}" {{if eq . $.Book.Meta.Status}}selected{{end}}>{{statusLabel (print .)}}</option>
+            {{end}}
+          </select>
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Track</label>
+          <input type="text" name="track" value="{{.Book.Meta.Track}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">ISBN</label>
+          <input type="text" name="isbn" value="{{.Book.Meta.ISBN}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Rating (1-5)</label>
+          <input type="number" name="rating" min="1" max="5" value="{{if .Book.Meta.Rating}}{{.Book.Meta.Rating}}{{end}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Started</label>
+          <input type="date" name="started" value="{{if .Book.Meta.Started}}{{.Book.Meta.Started}}{{end}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Finished</label>
+          <input type="date" name="finished" value="{{if .Book.Meta.Finished}}{{.Book.Meta.Finished}}{{end}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Acquired</label>
+          <input type="date" name="acquired" value="{{if .Book.Meta.Acquired}}{{.Book.Meta.Acquired}}{{end}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Source</label>
+          <input type="text" name="source" value="{{.Book.Meta.Source}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div class="col-span-2">
+          <label class="block text-neutral-500 mb-1">Themes (comma-separated)</label>
+          <input type="text" name="themes" value="{{join .Book.Meta.Themes ", "}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div class="col-span-2">
+          <button type="submit" class="px-5 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-sm transition-colors">Save Changes</button>
+        </div>
+      </form>
+    </div>
+  </details>
+
+  <!-- Prose body -->
+  {{if .BodyHTML}}
+  <div id="book-body"
+    class="prose prose-invert prose-neutral max-w-none font-serif"
+    hx-ext="sse"
+    sse-connect="/events"
+    hx-get="/book/{{.Book.Slug}}/body"
+    hx-trigger="sse:book-updated[detail.data === '{{.Book.Slug}}']"
+    hx-swap="innerHTML"
+  >
+    {{html .BodyHTML}}
+  </div>
+  {{end}}
+
+  <!-- File path for Neovim -->
+  <div class="mt-8 pt-6 border-t border-neutral-800">
+    <p class="text-xs text-neutral-600 font-mono">{{.Book.FilePath}}</p>
+  </div>
+
+</div>
+{{end}}

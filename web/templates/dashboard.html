@@ -1,0 +1,59 @@
+{{template "base.html" .}}
+
+{{define "title"}}bunbu-shelf — Dashboard{{end}}
+
+{{define "content"}}
+<div class="space-y-10">
+
+  <!-- Currently reading -->
+  <section>
+    <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-4">Currently Reading</h2>
+    {{if .CurrentlyReading}}
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      {{range .CurrentlyReading}}
+        {{template "book-card.html" .}}
+      {{end}}
+    </div>
+    {{else}}
+    <p class="text-neutral-500 text-sm">Nothing in progress. <a href="/search" class="text-blue-400 hover:underline">Find something to read →</a></p>
+    {{end}}
+  </section>
+
+  <!-- Recent finishes -->
+  {{if .RecentFinishes}}
+  <section>
+    <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-4">Recently Finished</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      {{range .RecentFinishes}}
+        {{template "book-card.html" .}}
+      {{end}}
+    </div>
+  </section>
+  {{end}}
+
+  <!-- Queue -->
+  {{if .Queue}}
+  <section>
+    <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-4">Up Next</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      {{range .Queue}}
+        {{template "book-card.html" .}}
+      {{end}}
+    </div>
+  </section>
+  {{end}}
+
+  <!-- Quick add -->
+  <section class="border border-neutral-800 rounded-lg p-5">
+    <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-3">Add a Book</h2>
+    <form method="GET" action="/search" class="flex gap-2">
+      <input
+        type="text" name="q" placeholder="Search by title, author, or ISBN…"
+        class="flex-1 bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-neutral-500"
+      >
+      <button type="submit" class="px-4 py-2 bg-neutral-800 hover:bg-neutral-700 text-sm rounded transition-colors">Search</button>
+    </form>
+  </section>
+
+</div>
+{{end}}

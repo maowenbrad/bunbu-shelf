@@ -1,0 +1,17 @@
+{{define "book-card.html"}}
+<a href="/book/{{.Slug}}" class="group block">
+  <div class="aspect-[2/3] bg-neutral-800 rounded overflow-hidden mb-2 relative">
+    {{if .Cover}}
+    <img src="/static/covers/{{.Slug}}.jpg" alt="{{.Title}}" class="w-full h-full object-cover">
+    {{else}}
+    <!-- Placeholder cover -->
+    <div class="w-full h-full flex flex-col items-center justify-center p-3 bg-neutral-800">
+      <span class="font-serif text-center text-xs text-neutral-300 leading-tight line-clamp-4">{{.Title}}</span>
+      <span class="text-neutral-500 text-xs mt-2 text-center">{{.Author}}</span>
+    </div>
+    {{end}}
+  </div>
+  <p class="font-serif text-sm text-neutral-200 leading-tight line-clamp-2 group-hover:text-white transition-colors">{{.Title}}</p>
+  <p class="text-xs text-neutral-500 mt-0.5 truncate">{{.Author}}</p>
+</a>
+{{end}}
