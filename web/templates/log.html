@@ -1,0 +1,33 @@
+{{template "base.html" .}}
+
+{{define "title"}}Reading Log{{end}}
+
+{{define "content"}}
+<div class="space-y-6 max-w-3xl">
+  <h1 class="font-serif text-2xl text-neutral-100">Reading Log</h1>
+
+  {{if .Books}}
+  <div class="space-y-2">
+    {{range .Books}}
+    <a href="/book/{{.Slug}}" class="flex items-center gap-4 p-3 rounded-lg hover:bg-neutral-900 transition-colors group">
+      <div class="flex-shrink-0 w-8 h-11 bg-neutral-800 rounded overflow-hidden">
+        {{if .Cover}}
+        <img src="/static/covers/{{.Slug}}.jpg" alt="" class="w-full h-full object-cover">
+        {{end}}
+      </div>
+      <div class="flex-1 min-w-0">
+        <p class="font-serif text-neutral-200 group-hover:text-white truncate">{{.Title}}</p>
+        <p class="text-sm text-neutral-500">{{.Author}}</p>
+      </div>
+      {{if .Rating}}
+      <div class="flex-shrink-0 text-amber-400 text-sm">{{.Rating}}★</div>
+      {{end}}
+    </a>
+    {{end}}
+  </div>
+  {{else}}
+  <p class="text-neutral-500">No finished books yet.</p>
+  {{end}}
+
+</div>
+{{end}}

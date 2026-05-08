@@ -1,0 +1,43 @@
+{{template "base.html" .}}
+
+{{define "title"}}Settings{{end}}
+
+{{define "content"}}
+<div class="max-w-xl space-y-6">
+  <h1 class="font-serif text-2xl text-neutral-100">Settings</h1>
+
+  {{if .Saved}}
+  <div class="p-3 bg-emerald-900/40 border border-emerald-700 rounded text-emerald-300 text-sm">
+    Settings saved.
+  </div>
+  {{end}}
+
+  <form method="POST" action="/settings" class="space-y-5">
+
+    <div>
+      <label class="block text-sm text-neutral-400 mb-1">Server address</label>
+      <input type="text" name="server_addr" value="{{.Config.ServerAddr}}"
+        class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 text-sm focus:outline-none focus:border-neutral-500">
+      <p class="text-xs text-neutral-600 mt-1">Requires restart to take effect.</p>
+    </div>
+
+    <div>
+      <label class="block text-sm text-neutral-400 mb-1">Active tracks (comma-separated)</label>
+      <input type="text" name="active_tracks" value="{{join .Config.ActiveTracks ", "}}"
+        class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 text-sm focus:outline-none focus:border-neutral-500">
+      <p class="text-xs text-neutral-600 mt-1">Tracks shown in the "currently reading" dashboard slots.</p>
+    </div>
+
+    <div>
+      <label class="block text-sm text-neutral-400 mb-1">Library directory</label>
+      <input type="text" disabled value="{{.Config.LibraryDir}}"
+        class="w-full bg-neutral-900/50 border border-neutral-800 rounded px-3 py-2 text-neutral-500 text-sm cursor-not-allowed font-mono">
+      <p class="text-xs text-neutral-600 mt-1">Edit config.toml directly to change this.</p>
+    </div>
+
+    <button type="submit" class="px-5 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-sm transition-colors">Save Settings</button>
+
+  </form>
+
+</div>
+{{end}}

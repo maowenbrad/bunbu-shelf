@@ -1,0 +1,23 @@
+{{template "base.html" .}}
+
+{{define "title"}}Themes{{end}}
+
+{{define "content"}}
+<div class="space-y-6 max-w-3xl">
+  <h1 class="font-serif text-2xl text-neutral-100">Themes</h1>
+
+  {{if .Themes}}
+  <div class="flex flex-wrap gap-2">
+    {{range .Themes}}
+    <a href="/shelf?theme={{.Theme}}" class="flex items-center gap-2 px-3 py-1.5 bg-neutral-900 hover:bg-neutral-800 rounded-full text-sm transition-colors">
+      <span class="text-neutral-200">{{.Theme}}</span>
+      <span class="text-neutral-500 text-xs">{{.Count}}</span>
+    </a>
+    {{end}}
+  </div>
+  {{else}}
+  <p class="text-neutral-500">No themes yet. Add some to your books.</p>
+  {{end}}
+
+</div>
+{{end}}

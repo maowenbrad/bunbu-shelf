@@ -1,0 +1,90 @@
+{{template "base.html" .}}
+
+{{define "title"}}Search{{end}}
+
+{{define "content"}}
+<div class="space-y-8 max-w-3xl">
+
+  <h1 class="font-serif text-2xl text-neutral-100">Search</h1>
+
+  <!-- Search form -->
+  <form method="GET" action="/search" class="flex gap-2">
+    <input
+      type="text" name="q" value="{{.Query}}"
+      placeholder="Title, author, quote, theme…"
+      autofocus
+      class="flex-1 bg-neutral-900 border border-neutral-700 rounded-lg px-4 py-2.5 text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-neutral-500"
+    >
+    <button type="submit" class="px-5 py-2.5 bg-neutral-800 hover:bg-neutral-700 rounded-lg text-sm transition-colors">Search</button>
+  </form>
+
+  {{if .Query}}
+
+  <!-- Local results -->
+  <section>
+    <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-3">In Your Library</h2>
+    {{if .LocalResults}}
+    <div class="space-y-3">
+      {{range .LocalResults}}
+      <a href="/book/{{.Slug}}" class="flex items-start gap-4 p-4 bg-neutral-900 rounded-lg hover:bg-neutral-800 transition-colors group">
+        <div class="flex-shrink-0 w-10 h-14 bg-neutral-800 rounded overflow-hidden">
+          {{if .Cover}}
+          <img src="/static/covers/{{.Slug}}.jpg" alt="" class="w-full h-full object-cover">
+          {{else}}
+          <div class="w-full h-full bg-neutral-700"></div>
+          {{end}}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-serif text-neutral-100 group-hover:text-white truncate">{{.Title}}</p>
+          <p class="text-sm text-neutral-400">{{.Author}}</p>
+          {{if .Snippet}}
+          <p class="text-sm text-neutral-500 mt-1 line-clamp-2 [&>mark]:bg-amber-900/60 [&>mark]:text-amber-200 [&>mark]:not-italic">{{html .Snippet}}</p>
+          {{end}}
+        </div>
+        <span class="text-xs {{statusColor (print .Status)}} flex-shrink-0">{{statusLabel (print .Status)}}</span>
+      </a>
+      {{end}}
+    </div>
+    {{else}}
+    <p class="text-neutral-500 text-sm">No matches in your library.</p>
+    {{end}}
+  </section>
+
+  <!-- Open Library results -->
+  <section>
+    <h2 class="text-xs font-semibold uppercase tracking-widest text-neutral-500 mb-3">Add to Library</h2>
+    {{if .RemoteResults}}
+    <div class="space-y-2">
+      {{range .RemoteResults}}
+      <div class="flex items-center gap-4 p-4 bg-neutral-900 rounded-lg">
+        <div class="flex-shrink-0 w-10 h-14 bg-neutral-800 rounded overflow-hidden">
+          {{if .CoverID}}
+          <img src="https://covers.openlibrary.org/b/id/{{.CoverID}}-S.jpg" alt="" class="w-full h-full object-cover" loading="lazy">
+          {{else}}
+          <div class="w-full h-full bg-neutral-700"></div>
+          {{end}}
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="font-serif text-neutral-100 truncate">{{.Title}}</p>
+          <p class="text-sm text-neutral-400">{{.Author}}{{if .Year}} · {{.Year}}{{end}}</p>
+          {{if .ISBN}}<p class="text-xs text-neutral-600 font-mono">{{.ISBN}}</p>{{end}}
+        </div>
+        <form method="POST" action="/search/add" class="flex-shrink-0">
+          <input type="hidden" name="title" value="{{.Title}}">
+          <input type="hidden" name="author" value="{{.Author}}">
+          <input type="hidden" name="isbn" value="{{.ISBN}}">
+          <input type="hidden" name="cover_id" value="{{.CoverID}}">
+          <button type="submit" class="px-3 py-1.5 bg-neutral-700 hover:bg-neutral-600 text-sm rounded transition-colors whitespace-nowrap">+ Add</button>
+        </form>
+      </div>
+      {{end}}
+    </div>
+    {{else}}
+    <p class="text-neutral-500 text-sm">No Open Library results.</p>
+    {{end}}
+  </section>
+
+  {{end}}
+
+</div>
+{{end}}
