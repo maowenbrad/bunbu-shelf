@@ -1,0 +1,70 @@
+name: CI
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -race ./...
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Cache Tailwind binary
+        uses: actions/cache@v4
+        with:
+          path: .bin/tailwindcss
+          key: tailwindcss-${{ runner.os }}-latest
+
+      - name: Download Tailwind if not cached
+        run: |
+          if [ ! -f .bin/tailwindcss ]; then
+            mkdir -p .bin
+            curl -sLo .bin/tailwindcss \
+              https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
+            chmod +x .bin/tailwindcss
+          fi
+
+      - name: Compile CSS
+        run: .bin/tailwindcss -i web/static/input.css -o web/static/app.css --minify
+
+      - name: Build shelfd
+        run: go build -v -o bin/shelfd ./cmd/shelfd
+
+      - name: Build shelf
+        run: go build -v -o bin/shelf ./cmd/shelf
+
+      - name: Upload binaries
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ github.sha }}
+          path: bin/
+          retention-days: 7
