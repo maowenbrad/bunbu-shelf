@@ -3,142 +3,36 @@ package server
 import (
 	"context"
 	"fmt"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
 
-	"github.com/user/bunbu-shelf/internal/book"
 	"github.com/user/bunbu-shelf/internal/openlibrary"
 )
 
-// olSearchResult is the template-facing view of an Open Library result.
-type olSearchResult struct {
-	Key       string
-	Title     string
-	Author    string
-	Year      int
-	ISBN      string
-	CoverID   int
-	Publisher string
-	Pages     int
-}
-
-func searchOpenLibrary(ctx context.Context, q string) []olSearchResult {
-	// Determine cover dir for client (not needed for search, only for add).
+func searchOpenLibrary(ctx context.Context, q string) []remoteSearchResult {
 	client := openlibrary.New("")
 	raw, err := client.SearchByTitle(ctx, q)
 	if err != nil {
 		return nil
 	}
-	var out []olSearchResult
+	var out []remoteSearchResult
 	for _, r := range raw {
 		author := ""
 		if len(r.Authors) > 0 {
 			author = r.Authors[0]
 		}
-		out = append(out, olSearchResult{
-			Key:       r.Key,
+		coverURL := ""
+		if r.CoverID > 0 {
+			coverURL = fmt.Sprintf("https://covers.openlibrary.org/b/id/%d-S.jpg", r.CoverID)
+		}
+		out = append(out, remoteSearchResult{
 			Title:     r.Title,
 			Author:    author,
 			Year:      r.Year,
 			ISBN:      r.ISBN,
 			CoverID:   r.CoverID,
+			CoverURL:  coverURL,
 			Publisher: r.Publisher,
 			Pages:     r.Pages,
 		})
 	}
 	return out
-}
-
-func (s *Server) handleAddFromOpenLibrary(w http.ResponseWriter, r *http.Request) {
-	if err := r.ParseForm(); err != nil {
-		http.Error(w, "bad request", http.StatusBadRequest)
-		return
-	}
-
-	title := strings.TrimSpace(r.FormValue("title"))
-	author := strings.TrimSpace(r.FormValue("author"))
-	isbn := strings.TrimSpace(r.FormValue("isbn"))
-	publisher := strings.TrimSpace(r.FormValue("publisher"))
-	coverIDStr := r.FormValue("cover_id")
-	yearStr := r.FormValue("year")
-	pagesStr := r.FormValue("pages")
-
-	if title == "" {
-		http.Error(w, "title required", http.StatusBadRequest)
-		return
-	}
-
-	slug := book.SlugFromTitle(title)
-	booksDir := filepath.Join(s.cfg.LibraryDir, "books")
-	if err := os.MkdirAll(booksDir, 0o755); err != nil {
-		http.Error(w, "cannot create books dir", http.StatusInternalServerError)
-		return
-	}
-
-	path := filepath.Join(booksDir, slug+".md")
-	if _, err := os.Stat(path); err == nil {
-		for i := 2; ; i++ {
-			candidate := filepath.Join(booksDir, fmt.Sprintf("%s-%d.md", slug, i))
-			if _, err := os.Stat(candidate); os.IsNotExist(err) {
-				path = candidate
-				slug = fmt.Sprintf("%s-%d", slug, i)
-				break
-			}
-		}
-	}
-
-	var year, pages int
-	fmt.Sscanf(yearStr, "%d", &year)
-	fmt.Sscanf(pagesStr, "%d", &pages)
-
-	meta := book.Frontmatter{
-		Title:       title,
-		Author:      author,
-		Status:      book.StatusAntilibrary,
-		ISBN:        isbn,
-		Publisher:   publisher,
-		PublishYear: year,
-		Pages:       pages,
-	}
-
-	// Fetch cover synchronously so the redirected detail page renders it on
-	// first paint. Both fetches have a bounded HTTP timeout. Prefer the
-	// ISBN-keyed cover — cover_id comes from a title search and can belong
-	// to a different printing/translation than the exact edition the ISBN
-	// identifies.
-	var coverID int
-	fmt.Sscanf(coverIDStr, "%d", &coverID)
-	if isbn != "" || coverID > 0 {
-		coverDir := filepath.Join(s.cfg.LibraryDir, "covers")
-		_ = os.MkdirAll(coverDir, 0o755)
-		client := openlibrary.New(coverDir)
-
-		var coverPath string
-		if isbn != "" {
-			coverPath, _ = client.FetchCoverByISBN(r.Context(), isbn, slug)
-		}
-		if coverPath == "" && coverID > 0 {
-			coverPath, _ = client.FetchCover(r.Context(), coverID, slug)
-		}
-		meta.Cover = coverPath
-	}
-
-	b := &book.Book{
-		Slug:     slug,
-		FilePath: path,
-		Meta:     meta,
-	}
-
-	if err := book.WriteFile(b); err != nil {
-		http.Error(w, "write error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-	if err := s.store.IndexBook(b); err != nil {
-		http.Error(w, "index error: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	http.Redirect(w, r, "/book/"+slug, http.StatusSeeOther)
 }

@@ -70,7 +70,7 @@ func (s *Server) registerRoutes(fsys fs.FS) {
 	s.mux.HandleFunc("DELETE /book/{slug}", s.handleDeleteBook)
 	s.mux.HandleFunc("POST /book/{slug}/status", s.handleUpdateStatus)
 	s.mux.HandleFunc("POST /settings", s.handleSaveSettings)
-	s.mux.HandleFunc("POST /search/add", s.handleAddFromOpenLibrary)
+	s.mux.HandleFunc("POST /search/add", s.handleAddFromSearch)
 	s.mux.HandleFunc("GET /book/{slug}/body", s.handleBookBody)
 }
 

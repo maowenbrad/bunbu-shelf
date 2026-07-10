@@ -76,9 +76,9 @@ func (s *Server) handleShelfStatus(w http.ResponseWriter, r *http.Request) {
 // ---- Book detail ----
 
 type bookDetailData struct {
-	Book       *book.Book
-	BodyHTML   string
-	BuyLinks   []buyLink
+	Book          *book.Book
+	BodyHTML      string
+	BuyLinks      []buyLink
 	ValidStatuses []book.Status
 }
 
@@ -143,7 +143,7 @@ func buildBuyURL(tmpl, title, author, isbn string) string {
 type searchData struct {
 	Query         string
 	LocalResults  []index.SearchResult
-	RemoteResults []olSearchResult
+	RemoteResults []remoteSearchResult
 }
 
 func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
@@ -152,7 +152,7 @@ func (s *Server) handleSearch(w http.ResponseWriter, r *http.Request) {
 
 	if q != "" {
 		data.LocalResults, _ = s.store.Search(q, 20)
-		data.RemoteResults = searchOpenLibrary(r.Context(), q)
+		data.RemoteResults = s.searchRemote(r.Context(), q)
 	}
 
 	s.renderer.render(w, "search.html", data)

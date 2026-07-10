@@ -127,13 +127,26 @@ concern rather than by resource:
   browser (from the watcher, or from `handleUpdateStatus`'s htmx endpoint).
 - `markdown.go`: goldmark with `html.WithUnsafe()` — book bodies are trusted
   local content, not untrusted user input from the web.
-- `openlibrary.go`: bridges `internal/openlibrary` search/cover-fetch into
-  the "add from search" flow; cover images are fetched synchronously on add
-  so the redirect target renders them on first paint.
+- `remotesearch.go`: the "add from search" flow. `searchRemote` dispatches
+  to Hardcover when `hardcover_api_key` is configured, Open Library
+  otherwise, flattening both into the template-facing `remoteSearchResult`.
+  Cover images are fetched synchronously on add so the redirect target
+  renders them on first paint (Hardcover results download their `cover_url`
+  directly; Open Library results prefer the ISBN-keyed cover endpoint).
+- `openlibrary.go` / `hardcover.go`: per-source bridges from
+  `internal/openlibrary` / `internal/hardcover` into `remoteSearchResult`.
 
 **`internal/openlibrary`** — thin client for openlibrary.org's search and
 cover-image endpoints. No API key. A cover image under 1000 bytes is treated
 as Open Library's "no cover" placeholder and discarded rather than saved.
+
+**`internal/hardcover`** — thin client for hardcover.app's GraphQL book
+search (Typesense-backed, so relevance ranking matches the Hardcover
+website). Requires an API key — `hardcover_api_key` in config.toml or the
+`HARDCOVER_API_KEY` env var. The GraphQL `results` field is a raw JSON blob
+whose shape has changed before, so `parseResults` tolerates both the
+Typesense hits envelope and a bare document array, and `image` as either a
+string or an object.
 
 **`internal/config`** — TOML config at `~/.config/bunbu-shelf/config.toml`
 (`config.DefaultPath()`), loaded via `LoadOrDefault` (defaults if the file
