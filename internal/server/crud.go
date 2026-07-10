@@ -177,7 +177,9 @@ func (s *Server) handleUpdateStatus(w http.ResponseWriter, r *http.Request) {
 	// htmx request: return a minimal status badge fragment.
 	if r.Header.Get("HX-Request") == "true" {
 		w.Header().Set("Content-Type", "text/html")
-		fmt.Fprintf(w, `<span class="status-badge status-%s">%s</span>`, newStatus, newStatus)
+		fmt.Fprintf(w,
+			`<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-mist %s"><span class="inline-block w-1.5 h-1.5 rounded-full %s"></span>%s</span>`,
+			statusColorClass(string(newStatus)), statusDotClass(string(newStatus)), statusLabel(string(newStatus)))
 		return
 	}
 	http.Redirect(w, r, "/book/"+slug, http.StatusSeeOther)

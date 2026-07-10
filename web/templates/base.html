@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,45 +7,45 @@
   <link rel="stylesheet" href="/static/app.css">
   <script src="/static/htmx.min.js"></script>
 </head>
-<body class="bg-netflix-black text-white min-h-screen font-sans antialiased">
+<body class="bg-ice text-ink min-h-screen font-sans antialiased flex flex-col">
 
-  <!-- Nav: fixed, fades from transparent gradient to solid on scroll -->
-  <nav id="main-nav"
-       class="fixed top-0 left-0 right-0 z-50 transition-colors duration-300 px-6 py-4"
-       style="background: linear-gradient(to bottom, rgba(0,0,0,0.75) 0%, transparent 100%);">
-    <div class="flex items-center justify-between max-w-screen-2xl mx-auto">
-      <!-- Logo -->
-      <a href="/" class="font-sans text-2xl font-black tracking-tighter text-netflix-red uppercase select-none">
-        bunbu-shelf
+  <header class="bg-ink text-white sticky top-0 z-50 shadow-md shadow-ink/10">
+    <div class="max-w-screen-xl mx-auto px-6 h-14 flex items-center gap-5 md:gap-8">
+      <!-- Wordmark -->
+      <a href="/" class="text-lg font-bold tracking-tight select-none whitespace-nowrap">
+        bunbu<span class="text-cyan">-</span>shelf
       </a>
 
       <!-- Nav links -->
-      <div class="flex items-center gap-6 text-sm font-medium text-white/70">
-        <a href="/shelf"    class="hover:text-white transition-colors">Shelf</a>
-        <a href="/search"   class="hover:text-white transition-colors">Search</a>
-        <a href="/themes"   class="hover:text-white transition-colors">Themes</a>
-        <a href="/log"      class="hover:text-white transition-colors">Log</a>
-        <a href="/settings" class="hover:text-white/40 transition-colors text-white/30">Settings</a>
-      </div>
+      <nav class="flex items-center gap-4 md:gap-6 text-sm font-medium text-white/70">
+        <a href="/shelf"  class="hover:text-cyan transition-colors">Shelf</a>
+        <a href="/search" class="hover:text-cyan transition-colors">Search</a>
+        <a href="/themes" class="hover:text-cyan transition-colors">Themes</a>
+        <a href="/log"    class="hover:text-cyan transition-colors">Log</a>
+      </nav>
+
+      <!-- Library search -->
+      <form method="GET" action="/search" class="ml-auto hidden md:block">
+        <input
+          type="search" name="q" placeholder="Search your library…"
+          class="w-56 lg:w-72 bg-white/10 border border-white/15 rounded-full px-4 py-1.5 text-sm text-white placeholder-white/40
+                 focus:outline-none focus:bg-white focus:text-ink focus:placeholder-fog-light focus:border-cyan transition-colors"
+        >
+      </form>
+
+      <a href="/settings" class="ml-auto md:ml-0 text-sm text-white/50 hover:text-cyan transition-colors">Settings</a>
     </div>
-  </nav>
+  </header>
 
-  <!-- Scroll handler: solid bg after scrolling past 80px -->
-  <script>
-    (function() {
-      var nav = document.getElementById('main-nav');
-      var solid = 'background:#141414';
-      var grad  = 'background:linear-gradient(to bottom,rgba(0,0,0,.75) 0%,transparent 100%)';
-      window.addEventListener('scroll', function() {
-        nav.style.cssText = window.scrollY > 80 ? solid : grad;
-      }, { passive: true });
-    })();
-  </script>
-
-  <!-- Main content -->
-  <main>
+  <main class="flex-1 w-full max-w-screen-xl mx-auto px-6 py-10">
     {{block "content" .}}{{end}}
   </main>
+
+  <footer class="border-t border-line mt-10">
+    <div class="max-w-screen-xl mx-auto px-6 py-6 text-xs text-fog-light">
+      bunbu-shelf · a local-first library — your books live as plain markdown files
+    </div>
+  </footer>
 
 </body>
 </html>

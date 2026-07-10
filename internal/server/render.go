@@ -131,33 +131,53 @@ func templateFuncs() template.FuncMap {
 			}
 			return out
 		},
-		"statusLabel": func(s string) string {
-			labels := map[string]string{
-				"antilibrary": "Antilibrary",
-				"queued":      "Queued",
-				"reading":     "Reading",
-				"finished":    "Finished",
-				"abandoned":   "Abandoned",
-				"reference":   "Reference",
-			}
-			if l, ok := labels[s]; ok {
-				return l
-			}
-			return s
-		},
-		"statusColor": func(s string) string {
-			colors := map[string]string{
-				"antilibrary": "text-neutral-400",
-				"queued":      "text-blue-400",
-				"reading":     "text-emerald-400",
-				"finished":    "text-purple-400",
-				"abandoned":   "text-red-400",
-				"reference":   "text-amber-400",
-			}
-			if c, ok := colors[s]; ok {
-				return c
-			}
-			return "text-neutral-400"
-		},
+		"statusLabel": statusLabel,
+		"statusColor": statusColorClass,
+		"statusDot":   statusDotClass,
 	}
+}
+
+func statusLabel(s string) string {
+	labels := map[string]string{
+		"antilibrary": "Antilibrary",
+		"queued":      "Queued",
+		"reading":     "Reading",
+		"finished":    "Finished",
+		"abandoned":   "Abandoned",
+		"reference":   "Reference",
+	}
+	if l, ok := labels[s]; ok {
+		return l
+	}
+	return s
+}
+
+func statusColorClass(s string) string {
+	colors := map[string]string{
+		"antilibrary": "text-fog-light",
+		"queued":      "text-fog",
+		"reading":     "text-teal-dark",
+		"finished":    "text-deep",
+		"abandoned":   "text-coral",
+		"reference":   "text-rose",
+	}
+	if c, ok := colors[s]; ok {
+		return c
+	}
+	return "text-fog"
+}
+
+func statusDotClass(s string) string {
+	dots := map[string]string{
+		"antilibrary": "bg-fog-light",
+		"queued":      "bg-cyan",
+		"reading":     "bg-teal",
+		"finished":    "bg-deep",
+		"abandoned":   "bg-coral",
+		"reference":   "bg-rose",
+	}
+	if d, ok := dots[s]; ok {
+		return d
+	}
+	return "bg-fog-light"
 }

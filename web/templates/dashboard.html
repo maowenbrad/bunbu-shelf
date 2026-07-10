@@ -3,96 +3,71 @@
 {{define "title"}}bunbu-shelf{{end}}
 
 {{define "content"}}
+<div class="space-y-12">
 
-<!-- HERO: first currently-reading book as backdrop -->
-{{if .CurrentlyReading}}
-{{with index .CurrentlyReading 0}}
-<section class="relative w-full min-h-[72vh] flex items-end pb-16 overflow-hidden">
-  <!-- Blurred background -->
-  <div class="absolute inset-0 z-0">
-    {{if .Cover}}
-    <img src="/static/{{.Cover}}" alt=""
-         class="w-full h-full object-cover scale-110 blur-sm opacity-25">
-    {{else}}
-    <div class="w-full h-full bg-gradient-to-br from-netflix-red/15 to-netflix-black"></div>
-    {{end}}
-    <!-- Bottom + left gradients to blend into page -->
-    <div class="absolute inset-0 bg-gradient-to-t from-netflix-black via-netflix-black/70 to-transparent"></div>
-    <div class="absolute inset-0 bg-gradient-to-r from-netflix-black/90 to-transparent"></div>
+  <!-- Page head: title + quick add -->
+  <div class="flex flex-wrap items-end justify-between gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-ink">Your Library</h1>
+      <p class="text-sm text-fog mt-1">What you're reading, what's up next, and what you've finished.</p>
+    </div>
+    <form method="GET" action="/search" class="flex w-full sm:w-auto gap-2">
+      <input
+        type="text" name="q" placeholder="Add a book — title, author, or ISBN…"
+        class="flex-1 sm:w-80 bg-white border border-line rounded-lg px-4 py-2 text-sm text-ink placeholder-fog-light shadow-sm
+               focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20"
+      >
+      <button type="submit"
+              class="px-4 py-2 bg-teal hover:bg-teal-dark text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">
+        Add
+      </button>
+    </form>
   </div>
 
-  <!-- Hero content -->
-  <div class="relative z-10 max-w-7xl mx-auto px-6 w-full flex items-end gap-8">
-    {{if .Cover}}
-    <div class="hidden sm:block flex-shrink-0 w-32 md:w-44 shadow-2xl shadow-black rounded overflow-hidden">
-      <img src="/static/{{.Cover}}" alt="{{.Title}}"
-           class="w-full aspect-[2/3] object-cover">
-    </div>
-    {{end}}
-
-    <div class="space-y-3 max-w-xl">
-      <p class="text-netflix-red text-xs font-bold uppercase tracking-widest">Currently Reading</p>
-      <h1 class="font-serif text-4xl md:text-5xl font-bold text-white leading-tight">{{.Title}}</h1>
-      <p class="text-xl text-white/60">{{.Author}}</p>
-      {{if .Rating}}
-      <p class="text-amber-400">{{.Rating}}★</p>
-      {{end}}
-      <div class="flex gap-3 pt-2">
-        <a href="/book/{{.Slug}}"
-           class="px-6 py-2.5 bg-white text-netflix-black font-bold text-sm rounded hover:bg-white/90 transition-colors">
-          View Book
-        </a>
-        <a href="/shelf/reading"
-           class="px-6 py-2.5 bg-white/20 text-white font-semibold text-sm rounded hover:bg-white/30 backdrop-blur transition-colors">
-          All Reading
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-{{end}}
-{{end}}
-
-<!-- PAGE BODY -->
-<div class="max-w-7xl mx-auto px-6 {{if .CurrentlyReading}}pb-16{{else}}pt-24 pb-16{{end}} space-y-12">
-
-  <!-- Continue Reading carousel -->
+  <!-- Currently Reading -->
   {{if .CurrentlyReading}}
   <section>
-    <h2 class="text-white font-bold text-lg mb-4">Continue Reading</h2>
-    <div class="flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-2">
+    <div class="flex items-baseline justify-between mb-4">
+      <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-fog">
+        Currently Reading <span class="text-fog-light font-semibold">({{len .CurrentlyReading}})</span>
+      </h2>
+      <a href="/shelf/reading" class="text-xs font-semibold text-teal hover:text-teal-dark transition-colors">View all →</a>
+    </div>
+    <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-x-4 gap-y-8">
       {{range .CurrentlyReading}}
-      <div class="w-32 sm:w-36 md:w-40 flex-shrink-0 py-4 px-1">
-        {{template "book-card.html" .}}
-      </div>
+      {{template "book-card.html" .}}
       {{end}}
     </div>
   </section>
   {{end}}
 
-  <!-- Up Next carousel -->
+  <!-- Up Next -->
   {{if .Queue}}
   <section>
-    <h2 class="text-white font-bold text-lg mb-4">Up Next</h2>
-    <div class="flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-2">
+    <div class="flex items-baseline justify-between mb-4">
+      <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-fog">
+        Up Next <span class="text-fog-light font-semibold">({{len .Queue}})</span>
+      </h2>
+      <a href="/shelf/queued" class="text-xs font-semibold text-teal hover:text-teal-dark transition-colors">View all →</a>
+    </div>
+    <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-x-4 gap-y-8">
       {{range .Queue}}
-      <div class="w-32 sm:w-36 md:w-40 flex-shrink-0 py-4 px-1">
-        {{template "book-card.html" .}}
-      </div>
+      {{template "book-card.html" .}}
       {{end}}
     </div>
   </section>
   {{end}}
 
-  <!-- Recently Finished carousel -->
+  <!-- Recently Finished -->
   {{if .RecentFinishes}}
   <section>
-    <h2 class="text-white font-bold text-lg mb-4">Recently Finished</h2>
-    <div class="flex gap-3 overflow-x-auto scrollbar-hide -mx-6 px-6 pb-2">
+    <div class="flex items-baseline justify-between mb-4">
+      <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-fog">Recently Finished</h2>
+      <a href="/log" class="text-xs font-semibold text-teal hover:text-teal-dark transition-colors">Reading log →</a>
+    </div>
+    <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-x-4 gap-y-8">
       {{range .RecentFinishes}}
-      <div class="w-32 sm:w-36 md:w-40 flex-shrink-0 py-4 px-1">
-        {{template "book-card.html" .}}
-      </div>
+      {{template "book-card.html" .}}
       {{end}}
     </div>
   </section>
@@ -100,29 +75,15 @@
 
   <!-- Empty library state -->
   {{if and (not .CurrentlyReading) (not .Queue) (not .RecentFinishes)}}
-  <div class="text-center py-32">
-    <p class="text-white/40 text-lg mb-6">Your shelf is empty.</p>
+  <div class="bg-white border border-line rounded-xl text-center py-24 px-6">
+    <p class="text-lg font-semibold text-ink mb-1">Your shelf is empty</p>
+    <p class="text-sm text-fog mb-6">Search Open Library to add your first book.</p>
     <a href="/search"
-       class="px-6 py-3 bg-netflix-red hover:bg-netflix-red-hover text-white font-bold rounded transition-colors">
-      Find Books to Read
+       class="inline-block px-5 py-2.5 bg-teal hover:bg-teal-dark text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">
+      Find books to add
     </a>
   </div>
   {{end}}
-
-  <!-- Quick Add -->
-  <section class="border border-netflix-border rounded-lg p-5 bg-netflix-surface/50">
-    <h2 class="text-xs font-bold uppercase tracking-widest text-netflix-muted mb-3">Add a Book</h2>
-    <form method="GET" action="/search" class="flex gap-2">
-      <input
-        type="text" name="q" placeholder="Search by title, author, or ISBN…"
-        class="flex-1 bg-netflix-surface border border-netflix-border rounded px-3 py-2 text-sm text-white placeholder-netflix-muted focus:outline-none focus:border-netflix-muted"
-      >
-      <button type="submit"
-              class="px-4 py-2 bg-netflix-red hover:bg-netflix-red-hover text-white text-sm font-semibold rounded transition-colors">
-        Search
-      </button>
-    </form>
-  </section>
 
 </div>
 {{end}}

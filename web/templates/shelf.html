@@ -3,56 +3,67 @@
 {{define "title"}}Shelf{{end}}
 
 {{define "content"}}
-<div class="max-w-7xl mx-auto px-6 pt-24 pb-16 space-y-8">
+<div class="space-y-8">
 
   <!-- Header + filters -->
-  <div class="flex items-center justify-between flex-wrap gap-4">
-    <h1 class="font-serif text-3xl font-bold text-white">
-      {{if .Status}}{{statusLabel .Status}}{{else}}All Books{{end}}
-    </h1>
+  <div class="flex items-end justify-between flex-wrap gap-4">
+    <div>
+      <h1 class="text-2xl font-bold text-ink">
+        {{if .Status}}{{statusLabel .Status}}{{else}}All Books{{end}}
+      </h1>
+      <p class="text-sm text-fog mt-1">{{len .Books}} book{{if ne (len .Books) 1}}s{{end}}</p>
+    </div>
 
     <div class="flex items-center gap-2 text-sm flex-wrap">
       <a href="/shelf"
-         class="px-4 py-1.5 rounded-full font-semibold transition-colors
-                {{if eq .Status ""}}bg-white text-netflix-black{{else}}bg-netflix-surface text-white/60 hover:text-white hover:bg-netflix-surface-2{{end}}">
+         class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
+                {{if eq .Status ""}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
         All
       </a>
       <a href="/shelf/reading"
-         class="px-4 py-1.5 rounded-full font-semibold transition-colors
-                {{if eq .Status "reading"}}bg-netflix-red text-white{{else}}bg-netflix-surface text-white/60 hover:text-white hover:bg-netflix-surface-2{{end}}">
+         class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
+                {{if eq .Status "reading"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
         Reading
       </a>
       <a href="/shelf/queued"
-         class="px-4 py-1.5 rounded-full font-semibold transition-colors
-                {{if eq .Status "queued"}}bg-white/20 text-white{{else}}bg-netflix-surface text-white/60 hover:text-white hover:bg-netflix-surface-2{{end}}">
+         class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
+                {{if eq .Status "queued"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
         Queued
       </a>
       <a href="/shelf/finished"
-         class="px-4 py-1.5 rounded-full font-semibold transition-colors
-                {{if eq .Status "finished"}}bg-white/20 text-white{{else}}bg-netflix-surface text-white/60 hover:text-white hover:bg-netflix-surface-2{{end}}">
+         class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
+                {{if eq .Status "finished"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
         Finished
       </a>
       <a href="/shelf/antilibrary"
-         class="px-4 py-1.5 rounded-full font-semibold transition-colors
-                {{if eq .Status "antilibrary"}}bg-white/10 text-white/80{{else}}bg-netflix-surface text-white/60 hover:text-white hover:bg-netflix-surface-2{{end}}">
+         class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
+                {{if eq .Status "antilibrary"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
         Antilibrary
+      </a>
+      <a href="/shelf/reference"
+         class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
+                {{if eq .Status "reference"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
+        Reference
+      </a>
+      <a href="/shelf/abandoned"
+         class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
+                {{if eq .Status "abandoned"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
+        Abandoned
       </a>
     </div>
   </div>
 
-  <!-- Book grid — each cell has padding so scale-105 hover doesn't clip neighbours -->
+  <!-- Book grid -->
   {{if .Books}}
-  <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-7 xl:grid-cols-8 gap-1">
+  <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-x-4 gap-y-8">
     {{range .Books}}
-    <div class="py-4 px-2">
-      {{template "book-card.html" .}}
-    </div>
+    {{template "book-card.html" .}}
     {{end}}
   </div>
   {{else}}
-  <div class="text-center py-32">
-    <p class="text-white/40">No books here yet.</p>
-    <a href="/search" class="text-netflix-red text-sm hover:text-netflix-red-hover mt-2 inline-block transition-colors">
+  <div class="bg-white border border-line rounded-xl text-center py-24 px-6">
+    <p class="text-fog mb-4">No books here yet.</p>
+    <a href="/search" class="text-sm font-semibold text-teal hover:text-teal-dark transition-colors">
       Add some →
     </a>
   </div>
