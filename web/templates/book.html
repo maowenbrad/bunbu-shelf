@@ -26,6 +26,15 @@
       <h1 class="font-serif text-3xl font-semibold text-neutral-100 leading-tight">{{.Book.Meta.Title}}</h1>
       <p class="text-lg text-neutral-400">{{.Book.Meta.Author}}</p>
 
+      <!-- Publish year · page count · publisher -->
+      {{if or .Book.Meta.PublishYear .Book.Meta.Pages .Book.Meta.Publisher}}
+      <div class="flex flex-wrap items-center gap-x-2 text-sm text-neutral-400 divide-x divide-neutral-700">
+        {{if .Book.Meta.PublishYear}}<span class="pr-2 first:pl-0">{{.Book.Meta.PublishYear}}</span>{{end}}
+        {{if .Book.Meta.Pages}}<span class="px-2 first:pl-0">{{.Book.Meta.Pages}} pages</span>{{end}}
+        {{if .Book.Meta.Publisher}}<span class="px-2 first:pl-0">{{.Book.Meta.Publisher}}</span>{{end}}
+      </div>
+      {{end}}
+
       <!-- Status + quick change -->
       <div class="flex items-center gap-2 flex-wrap">
         <span id="status-badge" class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{statusColor (print .Book.Meta.Status)}} bg-neutral-800">
@@ -33,6 +42,9 @@
         </span>
         {{if .Book.Meta.Track}}
         <span class="text-sm text-neutral-500">{{.Book.Meta.Track}}</span>
+        {{end}}
+        {{if gt .Book.Meta.Copies 1}}
+        <span class="text-sm text-neutral-500">{{.Book.Meta.Copies}} copies</span>
         {{end}}
       </div>
 
@@ -47,7 +59,7 @@
       {{if .Book.Meta.Themes}}
       <div class="flex flex-wrap gap-1.5">
         {{range .Book.Meta.Themes}}
-        <a href="/themes" class="px-2 py-0.5 bg-neutral-800 hover:bg-neutral-700 text-neutral-400 text-xs rounded transition-colors">{{.}}</a>
+        <a href="/themes" class="px-2 py-0.5 bg-netflix-red/20 hover:bg-netflix-red/30 text-netflix-red text-xs rounded transition-colors">{{.}}</a>
         {{end}}
       </div>
       {{end}}
@@ -86,6 +98,15 @@
       </div>
     </div>
   </div>
+
+  <!-- Description -->
+  {{if .Book.Meta.Description}}
+  <div class="mb-10">
+    <h2 class="font-serif text-lg text-neutral-100 mb-2">Description</h2>
+    <div class="w-10 border-t-2 border-netflix-red mb-4"></div>
+    <p class="text-neutral-300 leading-relaxed whitespace-pre-line max-w-3xl">{{.Book.Meta.Description}}</p>
+  </div>
+  {{end}}
 
   <!-- Edit form (collapsed by default, toggled by Edit button) -->
   <details id="edit-form" class="mb-8 border border-neutral-800 rounded-lg">
@@ -136,9 +157,34 @@
           <label class="block text-neutral-500 mb-1">Source</label>
           <input type="text" name="source" value="{{.Book.Meta.Source}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
         </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Publisher</label>
+          <input type="text" name="publisher" value="{{.Book.Meta.Publisher}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Publish Year</label>
+          <input type="number" name="publish_year" min="0" value="{{if .Book.Meta.PublishYear}}{{.Book.Meta.PublishYear}}{{end}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Pages</label>
+          <input type="number" name="pages" min="0" value="{{if .Book.Meta.Pages}}{{.Book.Meta.Pages}}{{end}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div>
+          <label class="block text-neutral-500 mb-1">Copies</label>
+          <input type="number" name="copies" min="0" placeholder="1" value="{{if .Book.Meta.Copies}}{{.Book.Meta.Copies}}{{end}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
         <div class="col-span-2">
           <label class="block text-neutral-500 mb-1">Themes (comma-separated)</label>
           <input type="text" name="themes" value="{{join .Book.Meta.Themes ", "}}" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+        </div>
+        <div class="col-span-2">
+          <label class="block text-neutral-500 mb-1">Description</label>
+          <textarea name="description" rows="4" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">{{.Book.Meta.Description}}</textarea>
+        </div>
+        <div class="col-span-2">
+          <label class="block text-neutral-500 mb-1">Cover image URL</label>
+          <input type="url" name="cover_url" placeholder="https://…" class="w-full bg-neutral-900 border border-neutral-700 rounded px-3 py-2 text-neutral-100 focus:outline-none focus:border-neutral-500">
+          <p class="text-xs text-neutral-600 mt-1">Paste a direct image link to replace the cover shown above. Leave blank to keep the current cover.</p>
         </div>
         <div class="col-span-2">
           <button type="submit" class="px-5 py-2 bg-neutral-700 hover:bg-neutral-600 rounded text-sm transition-colors">Save Changes</button>

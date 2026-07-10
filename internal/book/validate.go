@@ -56,6 +56,12 @@ func ValidateMeta(m Frontmatter) []ValidationError {
 			errs = append(errs, ValidationError{Field: "isbn", Message: err.Error()})
 		}
 	}
+	if m.Pages < 0 {
+		errs = append(errs, ValidationError{Field: "pages", Message: "must not be negative"})
+	}
+	if m.Copies < 0 {
+		errs = append(errs, ValidationError{Field: "copies", Message: "must not be negative"})
+	}
 
 	return errs
 }

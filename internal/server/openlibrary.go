@@ -14,12 +14,14 @@ import (
 
 // olSearchResult is the template-facing view of an Open Library result.
 type olSearchResult struct {
-	Key     string
-	Title   string
-	Author  string
-	Year    int
-	ISBN    string
-	CoverID int
+	Key       string
+	Title     string
+	Author    string
+	Year      int
+	ISBN      string
+	CoverID   int
+	Publisher string
+	Pages     int
 }
 
 func searchOpenLibrary(ctx context.Context, q string) []olSearchResult {
@@ -36,12 +38,14 @@ func searchOpenLibrary(ctx context.Context, q string) []olSearchResult {
 			author = r.Authors[0]
 		}
 		out = append(out, olSearchResult{
-			Key:     r.Key,
-			Title:   r.Title,
-			Author:  author,
-			Year:    r.Year,
-			ISBN:    r.ISBN,
-			CoverID: r.CoverID,
+			Key:       r.Key,
+			Title:     r.Title,
+			Author:    author,
+			Year:      r.Year,
+			ISBN:      r.ISBN,
+			CoverID:   r.CoverID,
+			Publisher: r.Publisher,
+			Pages:     r.Pages,
 		})
 	}
 	return out
@@ -56,7 +60,10 @@ func (s *Server) handleAddFromOpenLibrary(w http.ResponseWriter, r *http.Request
 	title := strings.TrimSpace(r.FormValue("title"))
 	author := strings.TrimSpace(r.FormValue("author"))
 	isbn := strings.TrimSpace(r.FormValue("isbn"))
+	publisher := strings.TrimSpace(r.FormValue("publisher"))
 	coverIDStr := r.FormValue("cover_id")
+	yearStr := r.FormValue("year")
+	pagesStr := r.FormValue("pages")
 
 	if title == "" {
 		http.Error(w, "title required", http.StatusBadRequest)
@@ -82,24 +89,40 @@ func (s *Server) handleAddFromOpenLibrary(w http.ResponseWriter, r *http.Request
 		}
 	}
 
+	var year, pages int
+	fmt.Sscanf(yearStr, "%d", &year)
+	fmt.Sscanf(pagesStr, "%d", &pages)
+
 	meta := book.Frontmatter{
-		Title:  title,
-		Author: author,
-		Status: book.StatusAntilibrary,
-		ISBN:   isbn,
+		Title:       title,
+		Author:      author,
+		Status:      book.StatusAntilibrary,
+		ISBN:        isbn,
+		Publisher:   publisher,
+		PublishYear: year,
+		Pages:       pages,
 	}
 
-	// Fetch cover synchronously so the redirected detail page renders it
-	// on first paint. FetchCover has a bounded HTTP timeout.
+	// Fetch cover synchronously so the redirected detail page renders it on
+	// first paint. Both fetches have a bounded HTTP timeout. Prefer the
+	// ISBN-keyed cover — cover_id comes from a title search and can belong
+	// to a different printing/translation than the exact edition the ISBN
+	// identifies.
 	var coverID int
 	fmt.Sscanf(coverIDStr, "%d", &coverID)
-	if coverID > 0 {
+	if isbn != "" || coverID > 0 {
 		coverDir := filepath.Join(s.cfg.LibraryDir, "covers")
 		_ = os.MkdirAll(coverDir, 0o755)
 		client := openlibrary.New(coverDir)
-		if coverPath, err := client.FetchCover(r.Context(), coverID, slug); err == nil && coverPath != "" {
-			meta.Cover = coverPath
+
+		var coverPath string
+		if isbn != "" {
+			coverPath, _ = client.FetchCoverByISBN(r.Context(), isbn, slug)
 		}
+		if coverPath == "" && coverID > 0 {
+			coverPath, _ = client.FetchCover(r.Context(), coverID, slug)
+		}
+		meta.Cover = coverPath
 	}
 
 	b := &book.Book{

@@ -83,18 +83,23 @@ func (d *Date) UnmarshalYAML(unmarshal func(interface{}) error) error {
 
 // Frontmatter mirrors the YAML block of a book file.
 type Frontmatter struct {
-	Title    string   `yaml:"title"`
-	Author   string   `yaml:"author"`
-	Status   Status   `yaml:"status"`
-	Track    string   `yaml:"track,omitempty"`
-	Started  *Date    `yaml:"started,omitempty"`
-	Finished *Date    `yaml:"finished,omitempty"`
-	Rating   *int     `yaml:"rating,omitempty"`
-	Themes   []string `yaml:"themes,omitempty"`
-	ISBN     string   `yaml:"isbn,omitempty"`
-	Cover    string   `yaml:"cover,omitempty"`
-	Acquired *Date    `yaml:"acquired,omitempty"`
-	Source   string   `yaml:"source,omitempty"`
+	Title       string   `yaml:"title"`
+	Author      string   `yaml:"author"`
+	Status      Status   `yaml:"status"`
+	Track       string   `yaml:"track,omitempty"`
+	Started     *Date    `yaml:"started,omitempty"`
+	Finished    *Date    `yaml:"finished,omitempty"`
+	Rating      *int     `yaml:"rating,omitempty"`
+	Themes      []string `yaml:"themes,omitempty"`
+	ISBN        string   `yaml:"isbn,omitempty"`
+	Cover       string   `yaml:"cover,omitempty"`
+	Acquired    *Date    `yaml:"acquired,omitempty"`
+	Source      string   `yaml:"source,omitempty"`
+	Publisher   string   `yaml:"publisher,omitempty"`
+	Pages       int      `yaml:"pages,omitempty"`
+	PublishYear int      `yaml:"publish_year,omitempty"`
+	Description string   `yaml:"description,omitempty"`
+	Copies      int      `yaml:"copies,omitempty"`
 }
 
 // Book is the in-memory representation of a single .md file.
