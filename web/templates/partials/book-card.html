@@ -1,36 +1,29 @@
 {{define "book-card.html"}}
-<a href="/book/{{.Slug}}" class="group block relative">
-  <div class="aspect-[2/3] bg-netflix-surface rounded overflow-hidden relative
-              transition-transform duration-300 ease-out
-              group-hover:scale-105 group-hover:z-10 group-hover:shadow-2xl group-hover:shadow-black/80">
+<a href="/book/{{.Slug}}" class="group block">
+  <div class="aspect-[2/3] rounded overflow-hidden bg-mist dark:bg-night-3 ring-1 ring-ink/10 dark:ring-white/10 shadow-sm
+              transition duration-200 ease-out
+              group-hover:shadow-lg group-hover:shadow-ink/15 group-hover:-translate-y-1 group-hover:ring-teal/50 dark:group-hover:ring-cyan/50">
     {{if .Cover}}
     <img src="/static/{{.Cover}}" alt="{{.Title}}" class="w-full h-full object-cover">
     {{else}}
-    <!-- Placeholder spine -->
-    <div class="w-full h-full flex flex-col items-center justify-center p-3
-                bg-gradient-to-br from-netflix-surface-2 to-netflix-surface">
-      <span class="font-serif text-center text-xs text-white/70 leading-tight line-clamp-5">{{.Title}}</span>
-      <span class="text-white/30 text-[10px] mt-2 text-center">{{.Author}}</span>
+    <!-- Placeholder cover: pale "book front" with a cyan spine -->
+    <div class="w-full h-full flex flex-col justify-between p-3 bg-gradient-to-br from-white to-mist dark:from-night-2 dark:to-night-3 border-l-4 border-cyan">
+      <span class="font-serif text-[13px] text-deep dark:text-line leading-snug line-clamp-5">{{.Title}}</span>
+      <span class="text-[10px] text-fog dark:text-fog-light uppercase tracking-wide line-clamp-2">{{.Author}}</span>
     </div>
     {{end}}
+  </div>
 
-    <!-- Hover overlay -->
-    <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent
-                opacity-0 group-hover:opacity-100 transition-opacity duration-300
-                flex flex-col justify-end p-3 pointer-events-none">
-      <p class="font-serif text-sm font-semibold text-white leading-tight line-clamp-2">{{.Title}}</p>
-      <p class="text-xs text-white/60 mt-0.5 truncate">{{.Author}}</p>
-      {{if .Rating}}
-      <p class="text-amber-400 text-xs mt-1">{{.Rating}}★</p>
-      {{end}}
-      <span class="inline-block mt-1.5 self-start px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide
-                   {{if eq (print .Status) "reading"}}bg-netflix-red text-white
-                   {{else if eq (print .Status) "finished"}}bg-white/20 text-white/80
-                   {{else if eq (print .Status) "queued"}}bg-white/10 text-white/60
-                   {{else}}bg-white/10 text-white/40{{end}}">
-        {{.Status}}
-      </span>
-    </div>
+  <!-- Caption below the cover, libib-style -->
+  <div class="mt-2">
+    <p class="text-[13px] font-semibold text-ink dark:text-ice leading-snug line-clamp-2 group-hover:text-teal-dark dark:group-hover:text-cyan transition-colors">{{.Title}}</p>
+    <p class="mt-0.5 text-xs text-fog dark:text-fog-light flex items-center gap-1.5">
+      <span class="inline-block w-1.5 h-1.5 rounded-full shrink-0 {{statusDot (print .Status)}}" title="{{statusLabel (print .Status)}}"></span>
+      <span class="truncate">{{.Author}}</span>
+    </p>
+    {{if .Rating}}
+    <p class="mt-0.5 text-[11px] tracking-tight text-amber-500 dark:text-amber-400">{{range stars .Rating}}{{.}}{{end}}</p>
+    {{end}}
   </div>
 </a>
 {{end}}

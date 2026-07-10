@@ -149,7 +149,11 @@ substitution (duplicated in `config.BuyLink` and
 `go:embed`. `templates/base.html` + `templates/partials/*.html` +
 one page template per route. Styling is Tailwind (`web/static/input.css` →
 compiled `app.css`, gitignored — must be built via `make css`, not committed)
-with a small custom "netflix" dark color palette in `tailwind.config.js`.
+with a small custom libib-inspired light palette (ink navy / teal / pale ice —
+`ink`, `teal`, `mist`, `fog`, …) defined in the `@theme` block of `input.css`
+(mirrored in `tailwind.config.js` for editor tooling only). Status badge/dot
+classes are emitted from Go (`server.statusColorClass`/`statusDotClass`), so
+`input.css` also `@source`s `internal/server/render.go`.
 Frontend interactivity is htmx (`web/static/htmx.min.js`, vendored) plus SSE
 for live updates — there is no JS build step or SPA framework.
 
