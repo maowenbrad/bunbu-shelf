@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/maowenbrad/bunbu-shelf/compare/v1.1.0...v1.2.0) (2026-07-10)
+
+
+### Features
+
+* dark mode, local cover upload, full metadata on book page ([dc1cdd7](https://github.com/maowenbrad/bunbu-shelf/commit/dc1cdd78aab84cbd15ff126e4222959d16fc9c0c))
+* redesign UI with libib-inspired light theme ([cedb3af](https://github.com/maowenbrad/bunbu-shelf/commit/cedb3afd4cb45158f3ae71574f549be52f5b4b09))
+
 ## [1.1.0](https://github.com/maowenbrad/bunbu-shelf/compare/v1.0.1...v1.1.0) (2026-07-10)
 
 
