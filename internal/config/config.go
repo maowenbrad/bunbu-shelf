@@ -15,6 +15,12 @@ type Config struct {
 	ActiveTracks []string   `toml:"active_tracks"`
 	ServerAddr   string     `toml:"server_addr"`
 	BuyTargets   BuyTargets `toml:"buy_targets"`
+
+	// HardcoverAPIKey enables hardcover.app as the book-search source in the
+	// add-from-search flow (Open Library is used when unset). Also read from
+	// the HARDCOVER_API_KEY environment variable, which keeps the secret out
+	// of config.toml.
+	HardcoverAPIKey string `toml:"hardcover_api_key"`
 }
 
 // BuyTargets groups the buy-button configuration.
@@ -61,6 +67,9 @@ func (c *Config) Defaults() {
 	}
 	if len(c.BuyTargets.Enabled) == 0 {
 		c.BuyTargets.Enabled = []string{"bookshop", "abebooks", "amazon"}
+	}
+	if c.HardcoverAPIKey == "" {
+		c.HardcoverAPIKey = os.Getenv("HARDCOVER_API_KEY")
 	}
 }
 

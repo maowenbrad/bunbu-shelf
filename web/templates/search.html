@@ -51,7 +51,7 @@
     {{end}}
   </section>
 
-  <!-- Open Library results -->
+  <!-- Remote results (Hardcover or Open Library) -->
   <section>
     <h2 class="text-xs font-bold uppercase tracking-[0.15em] text-fog mb-3">Add to Library</h2>
     {{if .RemoteResults}}
@@ -59,8 +59,8 @@
       {{range .RemoteResults}}
       <div class="flex items-center gap-4 p-4 bg-white dark:bg-night-2 border border-line dark:border-night-3 rounded-xl shadow-sm">
         <div class="flex-shrink-0 w-10 h-14 bg-mist dark:bg-night-3 rounded overflow-hidden ring-1 ring-ink/10 dark:ring-white/10">
-          {{if .CoverID}}
-          <img src="https://covers.openlibrary.org/b/id/{{.CoverID}}-S.jpg" alt="" class="w-full h-full object-cover" loading="lazy">
+          {{if .CoverURL}}
+          <img src="{{.CoverURL}}" alt="" class="w-full h-full object-cover" loading="lazy">
           {{else}}
           <div class="w-full h-full bg-mist dark:bg-night-3 border-l-2 border-cyan"></div>
           {{end}}
@@ -75,6 +75,7 @@
           <input type="hidden" name="author" value="{{.Author}}">
           <input type="hidden" name="isbn" value="{{.ISBN}}">
           <input type="hidden" name="cover_id" value="{{.CoverID}}">
+          <input type="hidden" name="cover_url" value="{{.CoverURL}}">
           <input type="hidden" name="year" value="{{.Year}}">
           <input type="hidden" name="publisher" value="{{.Publisher}}">
           <input type="hidden" name="pages" value="{{.Pages}}">
@@ -84,7 +85,7 @@
       {{end}}
     </div>
     {{else}}
-    <p class="text-fog dark:text-fog-light text-sm">No Open Library results.</p>
+    <p class="text-fog dark:text-fog-light text-sm">No results from book search.</p>
     {{end}}
   </section>
 

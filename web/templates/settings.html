@@ -35,6 +35,13 @@
       <p class="text-xs text-fog-light mt-1">Edit config.toml directly to change this.</p>
     </div>
 
+    <div>
+      <label class="block text-xs font-semibold text-fog dark:text-fog-light mb-1">Book search source</label>
+      <input type="text" disabled value="{{if .Config.HardcoverAPIKey}}Hardcover{{else}}Open Library{{end}}"
+        class="w-full bg-mist/60 dark:bg-night-3/60 border border-line dark:border-night-3 rounded-lg px-3 py-2 text-fog dark:text-fog-light text-sm cursor-not-allowed">
+      <p class="text-xs text-fog-light mt-1">Set hardcover_api_key in config.toml (or the HARDCOVER_API_KEY environment variable) to search Hardcover instead of Open Library. Requires restart.</p>
+    </div>
+
     <button type="submit" class="px-5 py-2 bg-teal hover:bg-teal-dark text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">Save Settings</button>
 
   </form>
