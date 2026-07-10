@@ -156,31 +156,38 @@ func indexBookTx(tx *sql.Tx, b *book.Book) error {
 		INSERT INTO books (
 			slug, file_path, title, author, status, track,
 			started, finished, rating, themes, isbn, cover,
-			acquired, source, body_md, mod_time
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+			acquired, source, publisher, pages, publish_year,
+			description, copies, body_md, mod_time
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 		ON CONFLICT(slug) DO UPDATE SET
-			file_path  = excluded.file_path,
-			title      = excluded.title,
-			author     = excluded.author,
-			status     = excluded.status,
-			track      = excluded.track,
-			started    = excluded.started,
-			finished   = excluded.finished,
-			rating     = excluded.rating,
-			themes     = excluded.themes,
-			isbn       = excluded.isbn,
-			cover      = excluded.cover,
-			acquired   = excluded.acquired,
-			source     = excluded.source,
-			body_md    = excluded.body_md,
-			mod_time   = excluded.mod_time,
-			indexed_at = CURRENT_TIMESTAMP
+			file_path    = excluded.file_path,
+			title        = excluded.title,
+			author       = excluded.author,
+			status       = excluded.status,
+			track        = excluded.track,
+			started      = excluded.started,
+			finished     = excluded.finished,
+			rating       = excluded.rating,
+			themes       = excluded.themes,
+			isbn         = excluded.isbn,
+			cover        = excluded.cover,
+			acquired     = excluded.acquired,
+			source       = excluded.source,
+			publisher    = excluded.publisher,
+			pages        = excluded.pages,
+			publish_year = excluded.publish_year,
+			description  = excluded.description,
+			copies       = excluded.copies,
+			body_md      = excluded.body_md,
+			mod_time     = excluded.mod_time,
+			indexed_at   = CURRENT_TIMESTAMP
 	`,
 		b.Slug, b.FilePath, b.Meta.Title, b.Meta.Author,
 		string(b.Meta.Status), b.Meta.Track,
 		started, finished, b.Meta.Rating,
 		string(themesJSON), b.Meta.ISBN, b.Meta.Cover,
-		acquired, b.Meta.Source, b.Body,
+		acquired, b.Meta.Source, b.Meta.Publisher, b.Meta.Pages, b.Meta.PublishYear,
+		b.Meta.Description, b.Meta.Copies, b.Body,
 		b.ModTime,
 	)
 	return err

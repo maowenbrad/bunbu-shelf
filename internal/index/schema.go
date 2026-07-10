@@ -1,32 +1,44 @@
 package index
 
 // schemaVersion is incremented when a new migration is added.
-const schemaVersion = 1
+const schemaVersion = 2
 
-// DDL statements for migration v1.
+// DDL statements. CREATE TABLE IF NOT EXISTS makes this safe to reapply in
+// full on every startup, which is enough for brand-new tables/indexes/
+// triggers — but it does NOT retroactively add columns to a books table
+// that already exists from an older schema version. Column additions (like
+// the v2 fields below) are instead applied by addMissingColumns in
+// migrations.go, which checks PRAGMA table_info and ALTERs in whatever is
+// missing. New columns still belong here too, so a fresh database gets them
+// from CREATE TABLE directly.
 const schemaDDL = `
 CREATE TABLE IF NOT EXISTS schema_version (
     version INTEGER NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS books (
-    slug        TEXT PRIMARY KEY,
-    file_path   TEXT NOT NULL,
-    title       TEXT NOT NULL,
-    author      TEXT NOT NULL,
-    status      TEXT NOT NULL,
-    track       TEXT NOT NULL DEFAULT '',
-    started     TEXT,
-    finished    TEXT,
-    rating      INTEGER,
-    themes      TEXT NOT NULL DEFAULT '[]',
-    isbn        TEXT NOT NULL DEFAULT '',
-    cover       TEXT NOT NULL DEFAULT '',
-    acquired    TEXT,
-    source      TEXT NOT NULL DEFAULT '',
-    body_md     TEXT NOT NULL DEFAULT '',
-    mod_time    DATETIME NOT NULL,
-    indexed_at  DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+    slug         TEXT PRIMARY KEY,
+    file_path    TEXT NOT NULL,
+    title        TEXT NOT NULL,
+    author       TEXT NOT NULL,
+    status       TEXT NOT NULL,
+    track        TEXT NOT NULL DEFAULT '',
+    started      TEXT,
+    finished     TEXT,
+    rating       INTEGER,
+    themes       TEXT NOT NULL DEFAULT '[]',
+    isbn         TEXT NOT NULL DEFAULT '',
+    cover        TEXT NOT NULL DEFAULT '',
+    acquired     TEXT,
+    source       TEXT NOT NULL DEFAULT '',
+    publisher    TEXT NOT NULL DEFAULT '',
+    pages        INTEGER NOT NULL DEFAULT 0,
+    publish_year INTEGER NOT NULL DEFAULT 0,
+    description  TEXT NOT NULL DEFAULT '',
+    copies       INTEGER NOT NULL DEFAULT 0,
+    body_md      TEXT NOT NULL DEFAULT '',
+    mod_time     DATETIME NOT NULL,
+    indexed_at   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE VIRTUAL TABLE IF NOT EXISTS books_fts USING fts5(

@@ -1,12 +1,15 @@
 package server
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/user/bunbu-shelf/internal/book"
 )
@@ -75,9 +78,23 @@ func (s *Server) handleUpdateBook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	meta := parseFrontmatterForm(r)
-	// The edit form does not expose Cover; preserve the existing value so
-	// saving via the form (e.g. changing status) doesn't wipe it.
+	// Preserve the existing cover unless the form submits a replacement URL,
+	// so saving other fields (e.g. changing status) doesn't wipe it.
 	meta.Cover = b.Meta.Cover
+	if coverURL := strings.TrimSpace(r.FormValue("cover_url")); coverURL != "" {
+		coverDir := filepath.Join(s.cfg.LibraryDir, "covers")
+		if err := os.MkdirAll(coverDir, 0o755); err != nil {
+			http.Error(w, "cannot create covers dir", http.StatusInternalServerError)
+			return
+		}
+		coverPath, err := downloadCover(r.Context(), coverURL, coverDir, slug)
+		if err != nil {
+			http.Error(w, "cover fetch error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+		meta.Cover = coverPath
+	}
+
 	errs := book.ValidateMeta(meta)
 	if len(errs) > 0 {
 		http.Error(w, "validation error: "+errs[0].Error(), http.StatusUnprocessableEntity)
@@ -179,16 +196,69 @@ func (s *Server) handleSaveSettings(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/settings?saved=1", http.StatusSeeOther)
 }
 
+// downloadCover fetches an image from a user-supplied URL and saves it to
+// coverDir/<slug>.jpg, so the cover displayed for a book can be corrected to
+// match the caller's actual physical copy. Bounded by a timeout and a size
+// cap since the URL is arbitrary.
+func downloadCover(ctx context.Context, rawURL, coverDir, slug string) (string, error) {
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, rawURL, nil)
+	if err != nil {
+		return "", fmt.Errorf("invalid cover URL: %w", err)
+	}
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", fmt.Errorf("fetch cover: %w", err)
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("fetch cover: status %d", resp.StatusCode)
+	}
+
+	const maxCoverBytes = 10 << 20 // 10MB
+	data, err := io.ReadAll(io.LimitReader(resp.Body, maxCoverBytes))
+	if err != nil {
+		return "", err
+	}
+	if len(data) == 0 {
+		return "", fmt.Errorf("empty response")
+	}
+
+	filename := slug + ".jpg"
+	if err := os.WriteFile(filepath.Join(coverDir, filename), data, 0o644); err != nil {
+		return "", err
+	}
+	return "covers/" + filename, nil
+}
+
 // parseFrontmatterForm extracts a Frontmatter from a form POST.
 func parseFrontmatterForm(r *http.Request) book.Frontmatter {
 	meta := book.Frontmatter{
-		Title:  strings.TrimSpace(r.FormValue("title")),
-		Author: strings.TrimSpace(r.FormValue("author")),
-		Status: book.Status(r.FormValue("status")),
-		Track:  strings.TrimSpace(r.FormValue("track")),
-		ISBN:   strings.TrimSpace(r.FormValue("isbn")),
-		Cover:  strings.TrimSpace(r.FormValue("cover")),
-		Source: strings.TrimSpace(r.FormValue("source")),
+		Title:       strings.TrimSpace(r.FormValue("title")),
+		Author:      strings.TrimSpace(r.FormValue("author")),
+		Status:      book.Status(r.FormValue("status")),
+		Track:       strings.TrimSpace(r.FormValue("track")),
+		ISBN:        strings.TrimSpace(r.FormValue("isbn")),
+		Cover:       strings.TrimSpace(r.FormValue("cover")),
+		Source:      strings.TrimSpace(r.FormValue("source")),
+		Publisher:   strings.TrimSpace(r.FormValue("publisher")),
+		Description: strings.TrimSpace(r.FormValue("description")),
+	}
+
+	if v := r.FormValue("pages"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			meta.Pages = n
+		}
+	}
+	if v := r.FormValue("publish_year"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			meta.PublishYear = n
+		}
+	}
+	if v := r.FormValue("copies"); v != "" {
+		if n, err := strconv.Atoi(v); err == nil {
+			meta.Copies = n
+		}
 	}
 
 	if themesRaw := r.FormValue("themes"); themesRaw != "" {

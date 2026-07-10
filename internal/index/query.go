@@ -58,7 +58,8 @@ func (s *Store) Get(slug string) (*book.Book, error) {
 	row := s.db.QueryRow(`
 		SELECT slug, file_path, title, author, status, track,
 		       started, finished, rating, themes, isbn, cover,
-		       acquired, source, body_md, mod_time
+		       acquired, source, publisher, pages, publish_year,
+		       description, copies, body_md, mod_time
 		FROM books WHERE slug = ?
 	`, slug)
 
@@ -73,7 +74,8 @@ func (s *Store) Get(slug string) (*book.Book, error) {
 		&b.Meta.Status, &b.Meta.Track,
 		&started, &finished, &rating,
 		&themesJSON, &b.Meta.ISBN, &b.Meta.Cover,
-		&acquired, &b.Meta.Source, &b.Body, &modTimeStr,
+		&acquired, &b.Meta.Source, &b.Meta.Publisher, &b.Meta.Pages, &b.Meta.PublishYear,
+		&b.Meta.Description, &b.Meta.Copies, &b.Body, &modTimeStr,
 	)
 	if err != nil {
 		return nil, fmt.Errorf("get book %s: %w", slug, err)
