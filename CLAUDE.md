@@ -85,16 +85,9 @@ porter/unicode61 tokenizer over title/author/themes/body) kept in sync via
 `AFTER INSERT/UPDATE/DELETE` triggers defined in the DDL itself
 (`schema.go`) — application code never touches `books_fts` directly.
 Migrations (`migrations.go`) are a single-version bump-and-reapply scheme:
-the whole DDL is idempotent (`CREATE ... IF NOT EXISTS`), so adding a new
-table/index/trigger means bumping `schemaVersion` and appending to
-`schemaDDL`, not writing a new incremental script. `CREATE TABLE IF NOT
-EXISTS`, however, can't retroactively add a column to a `books` table that
-already exists from an older version — new columns on an existing table go
-through `addMissingColumns`, which checks `PRAGMA table_info(books)` and
-`ALTER TABLE ADD COLUMN`s whatever's missing. It runs on every `Open()`
-regardless of `schemaVersion`, so it's self-healing for any database that
-was upgraded before a given column check existed, not just the version
-transition that introduced it.
+the whole DDL is idempotent (`CREATE ... IF NOT EXISTS`), so adding a
+migration means bumping `schemaVersion` and appending to `schemaDDL`, not
+writing a new incremental script.
 
 `Reindex(libraryDir)` is the sync entrypoint: it diffs `mod_time` on disk
 against what's stored, only re-parses changed files, and deletes rows for
