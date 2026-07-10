@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/maowenbrad/bunbu-shelf/compare/v1.0.1...v1.1.0) (2026-07-10)
+
+
+### Features
+
+* let users fix book covers and add richer metadata ([fd247d0](https://github.com/maowenbrad/bunbu-shelf/commit/fd247d07813bf41b976693e5bee9ab6f7498b10b))
+
 ## [1.0.1](https://github.com/maowenbrad/bunbu-shelf/compare/v1.0.0...v1.0.1) (2026-05-08)
 
 
