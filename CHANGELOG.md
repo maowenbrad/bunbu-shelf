@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.0](https://github.com/maowenbrad/bunbu-shelf/compare/v1.2.0...v1.3.0) (2026-07-10)
+
+
+### Features
+
+* add Hardcover as a configurable book-search source ([6dce9d0](https://github.com/maowenbrad/bunbu-shelf/commit/6dce9d0820b8e64bb18445624f55e9709b83faa0))
+* add Hardcover as a configurable book-search source ([b3ddecd](https://github.com/maowenbrad/bunbu-shelf/commit/b3ddecda5df2f48d372fc0b192f8a4b5526c8b9d))
+
 ## [1.2.0](https://github.com/maowenbrad/bunbu-shelf/compare/v1.1.0...v1.2.0) (2026-07-10)
 
 
