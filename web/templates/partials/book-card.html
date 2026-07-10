@@ -1,28 +1,28 @@
 {{define "book-card.html"}}
 <a href="/book/{{.Slug}}" class="group block">
-  <div class="aspect-[2/3] rounded overflow-hidden bg-mist ring-1 ring-ink/10 shadow-sm
+  <div class="aspect-[2/3] rounded overflow-hidden bg-mist dark:bg-night-3 ring-1 ring-ink/10 dark:ring-white/10 shadow-sm
               transition duration-200 ease-out
-              group-hover:shadow-lg group-hover:shadow-ink/15 group-hover:-translate-y-1 group-hover:ring-teal/50">
+              group-hover:shadow-lg group-hover:shadow-ink/15 group-hover:-translate-y-1 group-hover:ring-teal/50 dark:group-hover:ring-cyan/50">
     {{if .Cover}}
     <img src="/static/{{.Cover}}" alt="{{.Title}}" class="w-full h-full object-cover">
     {{else}}
     <!-- Placeholder cover: pale "book front" with a cyan spine -->
-    <div class="w-full h-full flex flex-col justify-between p-3 bg-gradient-to-br from-white to-mist border-l-4 border-cyan">
-      <span class="font-serif text-[13px] text-deep leading-snug line-clamp-5">{{.Title}}</span>
-      <span class="text-[10px] text-fog uppercase tracking-wide line-clamp-2">{{.Author}}</span>
+    <div class="w-full h-full flex flex-col justify-between p-3 bg-gradient-to-br from-white to-mist dark:from-night-2 dark:to-night-3 border-l-4 border-cyan">
+      <span class="font-serif text-[13px] text-deep dark:text-line leading-snug line-clamp-5">{{.Title}}</span>
+      <span class="text-[10px] text-fog dark:text-fog-light uppercase tracking-wide line-clamp-2">{{.Author}}</span>
     </div>
     {{end}}
   </div>
 
   <!-- Caption below the cover, libib-style -->
   <div class="mt-2">
-    <p class="text-[13px] font-semibold text-ink leading-snug line-clamp-2 group-hover:text-teal-dark transition-colors">{{.Title}}</p>
-    <p class="mt-0.5 text-xs text-fog flex items-center gap-1.5">
+    <p class="text-[13px] font-semibold text-ink dark:text-ice leading-snug line-clamp-2 group-hover:text-teal-dark dark:group-hover:text-cyan transition-colors">{{.Title}}</p>
+    <p class="mt-0.5 text-xs text-fog dark:text-fog-light flex items-center gap-1.5">
       <span class="inline-block w-1.5 h-1.5 rounded-full shrink-0 {{statusDot (print .Status)}}" title="{{statusLabel (print .Status)}}"></span>
       <span class="truncate">{{.Author}}</span>
     </p>
     {{if .Rating}}
-    <p class="mt-0.5 text-[11px] tracking-tight text-amber-500">{{range stars .Rating}}{{.}}{{end}}</p>
+    <p class="mt-0.5 text-[11px] tracking-tight text-amber-500 dark:text-amber-400">{{range stars .Rating}}{{.}}{{end}}</p>
     {{end}}
   </div>
 </a>

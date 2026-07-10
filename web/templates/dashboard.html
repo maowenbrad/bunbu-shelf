@@ -8,13 +8,13 @@
   <!-- Page head: title + quick add -->
   <div class="flex flex-wrap items-end justify-between gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-ink">Your Library</h1>
-      <p class="text-sm text-fog mt-1">What you're reading, what's up next, and what you've finished.</p>
+      <h1 class="text-2xl font-bold text-ink dark:text-ice">Your Library</h1>
+      <p class="text-sm text-fog dark:text-fog-light mt-1">What you're reading, what's up next, and what you've finished.</p>
     </div>
     <form method="GET" action="/search" class="flex w-full sm:w-auto gap-2">
       <input
         type="text" name="q" placeholder="Add a book — title, author, or ISBN…"
-        class="flex-1 sm:w-80 bg-white border border-line rounded-lg px-4 py-2 text-sm text-ink placeholder-fog-light shadow-sm
+        class="flex-1 sm:w-80 bg-white dark:bg-night-2 border border-line dark:border-night-3 rounded-lg px-4 py-2 text-sm text-ink dark:text-ice placeholder-fog-light dark:placeholder-fog shadow-sm
                focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20"
       >
       <button type="submit"
@@ -75,9 +75,9 @@
 
   <!-- Empty library state -->
   {{if and (not .CurrentlyReading) (not .Queue) (not .RecentFinishes)}}
-  <div class="bg-white border border-line rounded-xl text-center py-24 px-6">
-    <p class="text-lg font-semibold text-ink mb-1">Your shelf is empty</p>
-    <p class="text-sm text-fog mb-6">Search Open Library to add your first book.</p>
+  <div class="bg-white dark:bg-night-2 border border-line dark:border-night-3 rounded-xl text-center py-24 px-6">
+    <p class="text-lg font-semibold text-ink dark:text-ice mb-1">Your shelf is empty</p>
+    <p class="text-sm text-fog dark:text-fog-light mb-6">Search Open Library to add your first book.</p>
     <a href="/search"
        class="inline-block px-5 py-2.5 bg-teal hover:bg-teal-dark text-white text-sm font-semibold rounded-lg shadow-sm transition-colors">
       Find books to add

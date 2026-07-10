@@ -8,46 +8,46 @@
   <!-- Header + filters -->
   <div class="flex items-end justify-between flex-wrap gap-4">
     <div>
-      <h1 class="text-2xl font-bold text-ink">
+      <h1 class="text-2xl font-bold text-ink dark:text-ice">
         {{if .Status}}{{statusLabel .Status}}{{else}}All Books{{end}}
       </h1>
-      <p class="text-sm text-fog mt-1">{{len .Books}} book{{if ne (len .Books) 1}}s{{end}}</p>
+      <p class="text-sm text-fog dark:text-fog-light mt-1">{{len .Books}} book{{if ne (len .Books) 1}}s{{end}}</p>
     </div>
 
     <div class="flex items-center gap-2 text-sm flex-wrap">
       <a href="/shelf"
          class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
-                {{if eq .Status ""}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
+                {{if eq .Status ""}}bg-teal border-teal text-white{{else}}bg-white dark:bg-night-2 border-line dark:border-night-3 text-fog dark:text-fog-light hover:border-teal dark:hover:border-cyan hover:text-teal-dark dark:hover:text-cyan{{end}}">
         All
       </a>
       <a href="/shelf/reading"
          class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
-                {{if eq .Status "reading"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
+                {{if eq .Status "reading"}}bg-teal border-teal text-white{{else}}bg-white dark:bg-night-2 border-line dark:border-night-3 text-fog dark:text-fog-light hover:border-teal dark:hover:border-cyan hover:text-teal-dark dark:hover:text-cyan{{end}}">
         Reading
       </a>
       <a href="/shelf/queued"
          class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
-                {{if eq .Status "queued"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
+                {{if eq .Status "queued"}}bg-teal border-teal text-white{{else}}bg-white dark:bg-night-2 border-line dark:border-night-3 text-fog dark:text-fog-light hover:border-teal dark:hover:border-cyan hover:text-teal-dark dark:hover:text-cyan{{end}}">
         Queued
       </a>
       <a href="/shelf/finished"
          class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
-                {{if eq .Status "finished"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
+                {{if eq .Status "finished"}}bg-teal border-teal text-white{{else}}bg-white dark:bg-night-2 border-line dark:border-night-3 text-fog dark:text-fog-light hover:border-teal dark:hover:border-cyan hover:text-teal-dark dark:hover:text-cyan{{end}}">
         Finished
       </a>
       <a href="/shelf/antilibrary"
          class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
-                {{if eq .Status "antilibrary"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
+                {{if eq .Status "antilibrary"}}bg-teal border-teal text-white{{else}}bg-white dark:bg-night-2 border-line dark:border-night-3 text-fog dark:text-fog-light hover:border-teal dark:hover:border-cyan hover:text-teal-dark dark:hover:text-cyan{{end}}">
         Antilibrary
       </a>
       <a href="/shelf/reference"
          class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
-                {{if eq .Status "reference"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
+                {{if eq .Status "reference"}}bg-teal border-teal text-white{{else}}bg-white dark:bg-night-2 border-line dark:border-night-3 text-fog dark:text-fog-light hover:border-teal dark:hover:border-cyan hover:text-teal-dark dark:hover:text-cyan{{end}}">
         Reference
       </a>
       <a href="/shelf/abandoned"
          class="px-3.5 py-1.5 rounded-full font-medium border transition-colors
-                {{if eq .Status "abandoned"}}bg-teal border-teal text-white{{else}}bg-white border-line text-fog hover:border-teal hover:text-teal-dark{{end}}">
+                {{if eq .Status "abandoned"}}bg-teal border-teal text-white{{else}}bg-white dark:bg-night-2 border-line dark:border-night-3 text-fog dark:text-fog-light hover:border-teal dark:hover:border-cyan hover:text-teal-dark dark:hover:text-cyan{{end}}">
         Abandoned
       </a>
     </div>
@@ -61,8 +61,8 @@
     {{end}}
   </div>
   {{else}}
-  <div class="bg-white border border-line rounded-xl text-center py-24 px-6">
-    <p class="text-fog mb-4">No books here yet.</p>
+  <div class="bg-white dark:bg-night-2 border border-line dark:border-night-3 rounded-xl text-center py-24 px-6">
+    <p class="text-fog dark:text-fog-light mb-4">No books here yet.</p>
     <a href="/search" class="text-sm font-semibold text-teal hover:text-teal-dark transition-colors">
       Add some →
     </a>

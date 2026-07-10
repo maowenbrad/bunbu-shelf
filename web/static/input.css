@@ -1,8 +1,14 @@
 @import "tailwindcss";
 
 @source "../../web/templates";
-/* statusColor/statusDot in render.go emit utility classes from Go — scan it too */
+/* statusColor/statusDot in render.go and the htmx status-badge fragment in
+   crud.go emit utility classes from Go — scan them too */
 @source "../../internal/server/render.go";
+@source "../../internal/server/crud.go";
+
+/* Dark mode is toggled by putting .dark on <html> (see base.html), not by
+   the OS preference alone — the header button persists the choice. */
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
   /* Fonts */
@@ -21,7 +27,12 @@
   --color-fog:       #5E8396; /* muted blue-gray text */
   --color-fog-light: #74A4B0; /* lighter muted text */
   --color-rose:      #CD75A8; /* reference status */
-  --color-coral:     #DF6C5E; /* abandoned status, destructive */
+  --color-coral:     #DF6C5E; /* abandoned status, tag chips, destructive */
+
+  /* Dark mode surfaces (blue-tinted charcoal, one step lighter per level) */
+  --color-night:   #0F171C; /* page background */
+  --color-night-2: #17232B; /* cards, panels */
+  --color-night-3: #223440; /* borders, chips, hovers */
 }
 
 @layer base {
@@ -29,8 +40,16 @@
     color-scheme: light;
   }
 
+  .dark {
+    color-scheme: dark;
+  }
+
   body {
     background-color: #f7fbfd;
+  }
+
+  .dark body {
+    background-color: #0f171c;
   }
 }
 
@@ -124,5 +143,41 @@
     background: var(--color-mist);
     font-family: var(--font-sans);
     font-weight: 600;
+  }
+
+  /* Dark-mode prose overrides */
+  .dark .prose-book,
+  .dark .prose-book h1,
+  .dark .prose-book h2,
+  .dark .prose-book h3,
+  .dark .prose-book h4 {
+    color: var(--color-ice);
+  }
+  .dark .prose-book a {
+    color: var(--color-cyan);
+  }
+  .dark .prose-book a:hover {
+    color: var(--color-line);
+  }
+  .dark .prose-book blockquote {
+    border-left-color: var(--color-teal);
+    color: var(--color-fog-light);
+  }
+  .dark .prose-book code {
+    background: var(--color-night-3);
+    color: var(--color-line);
+  }
+  .dark .prose-book pre {
+    background: #0a1014;
+  }
+  .dark .prose-book hr {
+    border-top-color: var(--color-night-3);
+  }
+  .dark .prose-book th,
+  .dark .prose-book td {
+    border-color: var(--color-night-3);
+  }
+  .dark .prose-book th {
+    background: var(--color-night-3);
   }
 }

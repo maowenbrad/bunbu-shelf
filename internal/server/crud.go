@@ -72,26 +72,40 @@ func (s *Server) handleUpdateBook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := r.ParseForm(); err != nil {
+	// The edit form is multipart so a cover image can be uploaded directly;
+	// plain form posts (e.g. scripted updates) still work.
+	multipart := strings.HasPrefix(r.Header.Get("Content-Type"), "multipart/form-data")
+	if multipart {
+		if err := r.ParseMultipartForm(maxCoverBytes + 1<<20); err != nil {
+			http.Error(w, "bad request", http.StatusBadRequest)
+			return
+		}
+	} else if err := r.ParseForm(); err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
 
 	meta := parseFrontmatterForm(r)
-	// Preserve the existing cover unless the form submits a replacement URL,
-	// so saving other fields (e.g. changing status) doesn't wipe it.
+	// Preserve the existing cover unless the form submits a replacement
+	// (an uploaded file, or a URL to fetch), so saving other fields
+	// (e.g. changing status) doesn't wipe it.
 	meta.Cover = b.Meta.Cover
-	if coverURL := strings.TrimSpace(r.FormValue("cover_url")); coverURL != "" {
-		coverDir := filepath.Join(s.cfg.LibraryDir, "covers")
-		if err := os.MkdirAll(coverDir, 0o755); err != nil {
-			http.Error(w, "cannot create covers dir", http.StatusInternalServerError)
-			return
+	newCover := func() (string, error) {
+		if multipart {
+			if file, _, err := r.FormFile("cover_file"); err == nil {
+				defer file.Close()
+				return saveCoverUpload(file, filepath.Join(s.cfg.LibraryDir, "covers"), slug)
+			}
 		}
-		coverPath, err := downloadCover(r.Context(), coverURL, coverDir, slug)
-		if err != nil {
-			http.Error(w, "cover fetch error: "+err.Error(), http.StatusBadRequest)
-			return
+		if coverURL := strings.TrimSpace(r.FormValue("cover_url")); coverURL != "" {
+			return downloadCover(r.Context(), coverURL, filepath.Join(s.cfg.LibraryDir, "covers"), slug)
 		}
+		return "", nil
+	}
+	if coverPath, err := newCover(); err != nil {
+		http.Error(w, "cover error: "+err.Error(), http.StatusBadRequest)
+		return
+	} else if coverPath != "" {
 		meta.Cover = coverPath
 	}
 
@@ -178,7 +192,7 @@ func (s *Server) handleUpdateStatus(w http.ResponseWriter, r *http.Request) {
 	if r.Header.Get("HX-Request") == "true" {
 		w.Header().Set("Content-Type", "text/html")
 		fmt.Fprintf(w,
-			`<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-mist %s"><span class="inline-block w-1.5 h-1.5 rounded-full %s"></span>%s</span>`,
+			`<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-semibold bg-mist dark:bg-night-3 %s"><span class="inline-block w-1.5 h-1.5 rounded-full %s"></span>%s</span>`,
 			statusColorClass(string(newStatus)), statusDotClass(string(newStatus)), statusLabel(string(newStatus)))
 		return
 	}
@@ -197,6 +211,8 @@ func (s *Server) handleSaveSettings(w http.ResponseWriter, r *http.Request) {
 
 	http.Redirect(w, r, "/settings?saved=1", http.StatusSeeOther)
 }
+
+const maxCoverBytes = 10 << 20 // 10MB
 
 // downloadCover fetches an image from a user-supplied URL and saves it to
 // coverDir/<slug>.jpg, so the cover displayed for a book can be corrected to
@@ -217,15 +233,36 @@ func downloadCover(ctx context.Context, rawURL, coverDir, slug string) (string, 
 		return "", fmt.Errorf("fetch cover: status %d", resp.StatusCode)
 	}
 
-	const maxCoverBytes = 10 << 20 // 10MB
 	data, err := io.ReadAll(io.LimitReader(resp.Body, maxCoverBytes))
 	if err != nil {
 		return "", err
 	}
-	if len(data) == 0 {
-		return "", fmt.Errorf("empty response")
-	}
+	return writeCover(data, coverDir, slug)
+}
 
+// saveCoverUpload stores an image uploaded through the edit form as the
+// book's cover.
+func saveCoverUpload(file io.Reader, coverDir, slug string) (string, error) {
+	data, err := io.ReadAll(io.LimitReader(file, maxCoverBytes))
+	if err != nil {
+		return "", err
+	}
+	return writeCover(data, coverDir, slug)
+}
+
+// writeCover validates that data looks like an image and writes it to
+// coverDir/<slug>.jpg (the covers dir stores one file per slug, whatever
+// the original format — browsers sniff the real content type).
+func writeCover(data []byte, coverDir, slug string) (string, error) {
+	if len(data) == 0 {
+		return "", fmt.Errorf("empty image")
+	}
+	if !strings.HasPrefix(http.DetectContentType(data), "image/") {
+		return "", fmt.Errorf("not an image")
+	}
+	if err := os.MkdirAll(coverDir, 0o755); err != nil {
+		return "", err
+	}
 	filename := slug + ".jpg"
 	if err := os.WriteFile(filepath.Join(coverDir, filename), data, 0o644); err != nil {
 		return "", err

@@ -4,34 +4,34 @@
 
 {{define "content"}}
 <div class="max-w-xl space-y-6">
-  <h1 class="text-2xl font-bold text-ink">Settings</h1>
+  <h1 class="text-2xl font-bold text-ink dark:text-ice">Settings</h1>
 
   {{if .Saved}}
-  <div class="p-3 bg-cyan/15 border border-cyan rounded-lg text-deep text-sm font-medium">
+  <div class="p-3 bg-cyan/15 border border-cyan rounded-lg text-deep dark:text-cyan text-sm font-medium">
     Settings saved.
   </div>
   {{end}}
 
-  <form method="POST" action="/settings" class="bg-white border border-line rounded-xl shadow-sm p-6 space-y-5">
+  <form method="POST" action="/settings" class="bg-white dark:bg-night-2 border border-line dark:border-night-3 rounded-xl shadow-sm p-6 space-y-5">
 
     <div>
-      <label class="block text-xs font-semibold text-fog mb-1">Server address</label>
+      <label class="block text-xs font-semibold text-fog dark:text-fog-light mb-1">Server address</label>
       <input type="text" name="server_addr" value="{{.Config.ServerAddr}}"
-        class="w-full bg-white border border-line rounded-lg px-3 py-2 text-ink text-sm focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20">
+        class="w-full bg-white dark:bg-night border border-line dark:border-night-3 rounded-lg px-3 py-2 text-ink dark:text-ice text-sm focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20">
       <p class="text-xs text-fog-light mt-1">Requires restart to take effect.</p>
     </div>
 
     <div>
-      <label class="block text-xs font-semibold text-fog mb-1">Active tracks (comma-separated)</label>
+      <label class="block text-xs font-semibold text-fog dark:text-fog-light mb-1">Active tracks (comma-separated)</label>
       <input type="text" name="active_tracks" value="{{join .Config.ActiveTracks ", "}}"
-        class="w-full bg-white border border-line rounded-lg px-3 py-2 text-ink text-sm focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20">
+        class="w-full bg-white dark:bg-night border border-line dark:border-night-3 rounded-lg px-3 py-2 text-ink dark:text-ice text-sm focus:outline-none focus:border-teal focus:ring-2 focus:ring-teal/20">
       <p class="text-xs text-fog-light mt-1">Tracks shown in the "currently reading" dashboard slots.</p>
     </div>
 
     <div>
-      <label class="block text-xs font-semibold text-fog mb-1">Library directory</label>
+      <label class="block text-xs font-semibold text-fog dark:text-fog-light mb-1">Library directory</label>
       <input type="text" disabled value="{{.Config.LibraryDir}}"
-        class="w-full bg-mist/60 border border-line rounded-lg px-3 py-2 text-fog text-sm cursor-not-allowed font-mono">
+        class="w-full bg-mist/60 dark:bg-night-3/60 border border-line dark:border-night-3 rounded-lg px-3 py-2 text-fog dark:text-fog-light text-sm cursor-not-allowed font-mono">
       <p class="text-xs text-fog-light mt-1">Edit config.toml directly to change this.</p>
     </div>
 

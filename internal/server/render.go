@@ -155,24 +155,24 @@ func statusLabel(s string) string {
 func statusColorClass(s string) string {
 	colors := map[string]string{
 		"antilibrary": "text-fog-light",
-		"queued":      "text-fog",
-		"reading":     "text-teal-dark",
-		"finished":    "text-deep",
+		"queued":      "text-fog dark:text-fog-light",
+		"reading":     "text-teal-dark dark:text-cyan",
+		"finished":    "text-deep dark:text-line",
 		"abandoned":   "text-coral",
 		"reference":   "text-rose",
 	}
 	if c, ok := colors[s]; ok {
 		return c
 	}
-	return "text-fog"
+	return "text-fog dark:text-fog-light"
 }
 
 func statusDotClass(s string) string {
 	dots := map[string]string{
 		"antilibrary": "bg-fog-light",
 		"queued":      "bg-cyan",
-		"reading":     "bg-teal",
-		"finished":    "bg-deep",
+		"reading":     "bg-teal dark:bg-cyan",
+		"finished":    "bg-deep dark:bg-line",
 		"abandoned":   "bg-coral",
 		"reference":   "bg-rose",
 	}

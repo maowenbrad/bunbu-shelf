@@ -4,31 +4,31 @@
 
 {{define "content"}}
 <div class="space-y-6 max-w-3xl">
-  <h1 class="text-2xl font-bold text-ink">Reading Log</h1>
+  <h1 class="text-2xl font-bold text-ink dark:text-ice">Reading Log</h1>
 
   {{if .Books}}
-  <div class="bg-white border border-line rounded-xl shadow-sm divide-y divide-line overflow-hidden">
+  <div class="bg-white dark:bg-night-2 border border-line dark:border-night-3 rounded-xl shadow-sm divide-y divide-line dark:divide-night-3 overflow-hidden">
     {{range .Books}}
-    <a href="/book/{{.Slug}}" class="flex items-center gap-4 px-4 py-3 hover:bg-ice transition-colors group">
-      <div class="flex-shrink-0 w-8 h-11 bg-mist rounded overflow-hidden ring-1 ring-ink/10">
+    <a href="/book/{{.Slug}}" class="flex items-center gap-4 px-4 py-3 hover:bg-ice dark:hover:bg-night-3/60 transition-colors group">
+      <div class="flex-shrink-0 w-8 h-11 bg-mist dark:bg-night-3 rounded overflow-hidden ring-1 ring-ink/10 dark:ring-white/10">
         {{if .Cover}}
         <img src="/static/covers/{{.Slug}}.jpg" alt="" class="w-full h-full object-cover">
         {{else}}
-        <div class="w-full h-full bg-mist border-l-2 border-cyan"></div>
+        <div class="w-full h-full bg-mist dark:bg-night-3 border-l-2 border-cyan"></div>
         {{end}}
       </div>
       <div class="flex-1 min-w-0">
-        <p class="font-semibold text-ink group-hover:text-teal-dark transition-colors truncate">{{.Title}}</p>
-        <p class="text-sm text-fog">{{.Author}}</p>
+        <p class="font-semibold text-ink dark:text-ice group-hover:text-teal-dark dark:group-hover:text-cyan transition-colors truncate">{{.Title}}</p>
+        <p class="text-sm text-fog dark:text-fog-light">{{.Author}}</p>
       </div>
       {{if .Rating}}
-      <div class="flex-shrink-0 text-amber-500 text-sm">{{range stars .Rating}}{{.}}{{end}}</div>
+      <div class="flex-shrink-0 text-amber-500 dark:text-amber-400 text-sm">{{range stars .Rating}}{{.}}{{end}}</div>
       {{end}}
     </a>
     {{end}}
   </div>
   {{else}}
-  <p class="text-fog">No finished books yet.</p>
+  <p class="text-fog dark:text-fog-light">No finished books yet.</p>
   {{end}}
 
 </div>
